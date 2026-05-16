@@ -20,7 +20,6 @@ Instead of writing direct register-level instructions every time, firmware libra
 * Easier debugging
 * Improved modularity
 
-![Firmware Library](images/firmware_library.png)
 
 The firmware library acts as a bridge between application logic and hardware registers.
 
@@ -46,7 +45,7 @@ This is easier to understand than directly manipulating hardware registers.
 * Improves portability
 * Encourages modular firmware design
 
-![Embedded API](images/api_structure.png)
+
 
 APIs create a software layer between application code and hardware-specific implementation.
 
@@ -173,20 +172,6 @@ These define logical pin assignments.
 
 ---
 
-### Program Flow
-
-The firmware performs the following steps:
-
-1. Starts execution
-2. Initializes LED as output
-3. Initializes button as input
-4. Turns LED ON
-5. Reads button state
-6. Prints button value
-7. Turns LED OFF
-8. Ends execution
-
----
 
 ### Example Execution Output
 
@@ -214,7 +199,7 @@ From this lab, the following concepts were understood:
 * API-based firmware design
 * Separation between application and driver layers
 
-![Firmware Architecture](images/lab_architecture.png)
+
 
 ---
 
