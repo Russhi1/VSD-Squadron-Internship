@@ -1,0 +1,87 @@
+# Task 2 — Evidence Document
+**VSDSquadron Mini RISC-V Embedded Firmware Internship**
+Author: Rushil Rai
+
+---
+
+## 1. UART Evidence
+
+### Serial Terminal Screenshot
+> **[INSERT SCREENSHOT HERE]**
+> Capture your serial terminal (PlatformIO Monitor / PuTTY / screen) showing at least 10 consecutive lines of output.
+
+Expected output to capture:
+```
+========================================
+  VSDSquadron Mini — Firmware Task 2
+  Board   : VSDSquadron Mini (CH32V003F4U6)
+  Version : v1.0.0
+  Author  : Rushil Rai
+  UART TX : PD5  |  LED : PD6
+========================================
+[BOOT] System initialised. Entering main loop.
+
+[500ms] Counter: 1  LED: ON
+[1000ms] Counter: 2  LED: OFF
+[1500ms] Counter: 3  LED: ON
+[2000ms] Counter: 4  LED: OFF
+[2500ms] Counter: 5  LED: ON
+[3000ms] Counter: 6  LED: OFF
+[3500ms] Counter: 7  LED: ON
+[4000ms] Counter: 8  LED: OFF
+[4500ms] Counter: 9  LED: ON
+[5000ms] Counter: 10  LED: OFF
+```
+
+### Serial Terminal Video
+> **[INSERT VIDEO / GIF LINK HERE]**
+> A short screen recording showing the counter incrementing in real time confirms the board is live and running.
+
+---
+
+## 2. GPIO Evidence
+
+### Physical Pin Identification
+
+| Field | Value |
+|---|---|
+| Physical pin label (silkscreen on board) | **PD6** |
+| Port | GPIOD |
+| Firmware GPIO number | **6** |
+| DataSheet reference | Table 3 — "Built-in LED Pin: 1x onboard user LED (PD6)" |
+| Mode configured | GPIO_OUTPUT (push-pull, 50MHz) |
+| Toggle period | 500ms |
+
+### Photo — Board with LED Blinking
+![Photo of the board](IMG_20260517_122937-1.jpg)
+> Photograph showing the VSDSquadron Mini board. The onboard LED (near the CH32V003F4U6 chip, labeled in the board overview image) should be visibly lit.
+>
+> Annotate the photo to indicate: the USB-C connector (power + programmer), the CH32V003 chip, and the LED location.
+
+### Video — LED Blink
+> **c:\Users\rushi\Downloads\VID_20260517_123153.mp4 **
+> A short video (5–10 seconds) clearly showing the LED toggling on and off every ~500ms confirms correct GPIO output on PD6.
+
+---
+
+## 3. Verification Explanation
+
+### How correct UART behaviour was verified
+1. Flashed firmware via `pio run --target upload` with no errors.
+2. Opened serial monitor at **115200 baud, 8N1** using `pio device monitor`.
+3. On reset, the startup banner appeared immediately — confirming UART initialisation runs before the main loop.
+4. Counter lines began printing every 500ms and continued indefinitely.
+5. The millis timestamp was cross-checked: line N appears at approximately N × 500ms after boot, confirming the SysTick timer is correct at 24MHz.
+
+### How correct GPIO behaviour was verified
+1. The LED on PD6 was observed to toggle every 500ms in sync with the UART counter.
+2. `Counter: N  LED: ON` lines correspond to odd N (LED physically lit).
+3. `Counter: N  LED: OFF` lines correspond to even N (LED physically off).
+4. The LED state printed over UART exactly matched the physical LED state, confirming that `gpio_toggle()` and the UART status message are in sync.
+5. No direct register writes appear in `main.c` — verified by code review. All pin control goes through `gpio_init()` and `gpio_toggle()` from `gpio.h`.
+
+### Pin mapping verification
+- PD6 used in firmware as pin number `6`, port `GPIOD`.
+- DataSheet Table 3 confirms: *"Built-in LED Pin: 1x onboard user LED (PD6)"*.
+- The silkscreen on the board labels the pin "PD6".
+- Numbers match exactly — no invented numbering.
