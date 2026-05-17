@@ -10,28 +10,7 @@ Author: Rushil Rai
 > **[INSERT SCREENSHOT HERE]**
 > Capture your serial terminal (PlatformIO Monitor / PuTTY / screen) showing at least 10 consecutive lines of output.
 
-Expected output to capture:
-```
-========================================
-  VSDSquadron Mini — Firmware Task 2
-  Board   : VSDSquadron Mini (CH32V003F4U6)
-  Version : v1.0.0
-  Author  : Rushil Rai
-  UART TX : PD5  |  LED : PD6
-========================================
-[BOOT] System initialised. Entering main loop.
-
-[500ms] Counter: 1  LED: ON
-[1000ms] Counter: 2  LED: OFF
-[1500ms] Counter: 3  LED: ON
-[2000ms] Counter: 4  LED: OFF
-[2500ms] Counter: 5  LED: ON
-[3000ms] Counter: 6  LED: OFF
-[3500ms] Counter: 7  LED: ON
-[4000ms] Counter: 8  LED: OFF
-[4500ms] Counter: 9  LED: ON
-[5000ms] Counter: 10  LED: OFF
-```
+![Expected output to capture:](<Screenshot 2026-05-17 151427.png>)
 
 ### Serial Terminal Video
 > **[INSERT VIDEO / GIF LINK HERE]**
@@ -54,13 +33,11 @@ Expected output to capture:
 
 ### Photo — Board with LED Blinking
 ![Photo of the board](IMG_20260517_122937-1.jpg)
-> Photograph showing the VSDSquadron Mini board. The onboard LED (near the CH32V003F4U6 chip, labeled in the board overview image) should be visibly lit.
->
-> Annotate the photo to indicate: the USB-C connector (power + programmer), the CH32V003 chip, and the LED location.
+> Photograph showing the VSDSquadron Mini board. The onboard LED (near the CH32V003F4U6 
 
 ### Video — LED Blink
-> **c:\Users\rushi\Downloads\VID_20260517_123153.mp4 **
-> A short video (5–10 seconds) clearly showing the LED toggling on and off every ~500ms confirms correct GPIO output on PD6.
+> [https://drive.google.com/file/d/1l4dPLskBvNlhxPzHHhfJKTqWoAQj0xlw/view?usp=sharing]
+
 
 ---
 
