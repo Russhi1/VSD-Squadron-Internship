@@ -7,8 +7,6 @@ Author: Rushil Rai
 ## 1. UART Evidence
 
 ### Serial Terminal Screenshot
-> **[INSERT SCREENSHOT HERE]**
-> Capture your serial terminal (PlatformIO Monitor / PuTTY / screen) showing at least 10 consecutive lines of output.
 
 ![Expected output to capture:](<Screenshot 2026-05-17 151427.png>)
 
