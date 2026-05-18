@@ -384,7 +384,7 @@ END GROUP
                 0x0000000020000000                . = ALIGN (0x4)
                 0x0000000020000000                PROVIDE (_highcode_vma_end = .)
 
-.text           0x00000000000000c0      0x5fc
+.text           0x00000000000000c0      0x5e0
                 0x00000000000000c0                . = ALIGN (0x4)
  *(.text)
  .text          0x00000000000000c0       0x14 c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/rv32ecxw/ilp32e\libgcc.a(save-restore.o)
@@ -456,66 +456,66 @@ END GROUP
                 0x00000000000003ba       0x1a .pio\build\vsdsquadronMini\src\main.o
                 0x00000000000003ba                SysTick_Handler
  .text.startup.main
-                0x00000000000003d4      0x152 .pio\build\vsdsquadronMini\src\main.o
+                0x00000000000003d4      0x148 .pio\build\vsdsquadronMini\src\main.o
                 0x00000000000003d4                main
  .text.RCC_AdjustHSICalibrationValue
-                0x0000000000000526       0x12 .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
-                0x0000000000000526                RCC_AdjustHSICalibrationValue
+                0x000000000000051c       0x12 .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
+                0x000000000000051c                RCC_AdjustHSICalibrationValue
  .text.__libc_init_array
-                0x0000000000000538       0x5c c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-init.o)
-                0x0000000000000538                __libc_init_array
+                0x000000000000052e       0x5c c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-init.o)
+                0x000000000000052e                __libc_init_array
  *(.rodata)
  *(.rodata*)
- *fill*         0x0000000000000594        0x0 
+ *fill*         0x000000000000058a        0x2 
  .rodata.main.str1.4
-                0x0000000000000594      0x128 .pio\build\vsdsquadronMini\src\main.o
-                                        0x12b (size before relaxing)
+                0x000000000000058c      0x114 .pio\build\vsdsquadronMini\src\main.o
+                                        0x117 (size before relaxing)
  *(.gnu.linkonce.t.*)
-                0x00000000000006bc                . = ALIGN (0x4)
-                0x00000000000006bc                __fsymtab_start = .
+                0x00000000000006a0                . = ALIGN (0x4)
+                0x00000000000006a0                __fsymtab_start = .
  *(FSymTab)
-                0x00000000000006bc                __fsymtab_end = .
-                0x00000000000006bc                . = ALIGN (0x4)
-                0x00000000000006bc                __vsymtab_start = .
+                0x00000000000006a0                __fsymtab_end = .
+                0x00000000000006a0                . = ALIGN (0x4)
+                0x00000000000006a0                __vsymtab_start = .
  *(VSymTab)
-                0x00000000000006bc                __vsymtab_end = .
-                0x00000000000006bc                . = ALIGN (0x4)
-                0x00000000000006bc                . = ALIGN (0x4)
-                0x00000000000006bc                __rt_init_start = .
+                0x00000000000006a0                __vsymtab_end = .
+                0x00000000000006a0                . = ALIGN (0x4)
+                0x00000000000006a0                . = ALIGN (0x4)
+                0x00000000000006a0                __rt_init_start = .
  *(SORT_BY_NAME(.rti_fn*))
-                0x00000000000006bc                __rt_init_end = .
-                0x00000000000006bc                . = ALIGN (0x4)
-                0x00000000000006bc                . = ALIGN (0x4)
-                0x00000000000006bc                __rtmsymtab_start = .
+                0x00000000000006a0                __rt_init_end = .
+                0x00000000000006a0                . = ALIGN (0x4)
+                0x00000000000006a0                . = ALIGN (0x4)
+                0x00000000000006a0                __rtmsymtab_start = .
  *(RTMSymTab)
-                0x00000000000006bc                __rtmsymtab_end = .
-                0x00000000000006bc                . = ALIGN (0x4)
+                0x00000000000006a0                __rtmsymtab_end = .
+                0x00000000000006a0                . = ALIGN (0x4)
 
-.rela.dyn       0x00000000000006bc        0x0
- .rela.init     0x00000000000006bc        0x0 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
+.rela.dyn       0x00000000000006a0        0x0
+ .rela.init     0x00000000000006a0        0x0 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
  .rela.text.handle_reset
-                0x00000000000006bc        0x0 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
+                0x00000000000006a0        0x0 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
  .rela.text.__libc_init_array
-                0x00000000000006bc        0x0 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
+                0x00000000000006a0        0x0 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
 
-.fini           0x00000000000006bc        0x0
+.fini           0x00000000000006a0        0x0
  *(SORT_NONE(.fini))
-                0x00000000000006bc                . = ALIGN (0x4)
+                0x00000000000006a0                . = ALIGN (0x4)
                 [!provide]                        PROVIDE (_etext = .)
                 [!provide]                        PROVIDE (_eitcm = .)
 
-.preinit_array  0x00000000000006bc        0x0
-                0x00000000000006bc                PROVIDE (__preinit_array_start = .)
+.preinit_array  0x00000000000006a0        0x0
+                0x00000000000006a0                PROVIDE (__preinit_array_start = .)
  *(.preinit_array)
-                0x00000000000006bc                PROVIDE (__preinit_array_end = .)
+                0x00000000000006a0                PROVIDE (__preinit_array_end = .)
 
-.init_array     0x00000000000006bc        0x0
-                0x00000000000006bc                PROVIDE (__init_array_start = .)
+.init_array     0x00000000000006a0        0x0
+                0x00000000000006a0                PROVIDE (__init_array_start = .)
  *(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*))
  *(.init_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .ctors)
-                0x00000000000006bc                PROVIDE (__init_array_end = .)
+                0x00000000000006a0                PROVIDE (__init_array_end = .)
 
-.fini_array     0x00000000000006bc        0x0
+.fini_array     0x00000000000006a0        0x0
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_INIT_PRIORITY(.fini_array.*) SORT_BY_INIT_PRIORITY(.dtors.*))
  *(.fini_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .dtors)
@@ -535,15 +535,15 @@ END GROUP
  *(SORT_BY_NAME(.dtors.*))
  *(.dtors)
 
-.dalign         0x0000000020000000        0x0 load address 0x00000000000006bc
+.dalign         0x0000000020000000        0x0 load address 0x00000000000006a0
                 0x0000000020000000                . = ALIGN (0x4)
                 0x0000000020000000                PROVIDE (_data_vma = .)
 
-.dlalign        0x00000000000006bc        0x0
-                0x00000000000006bc                . = ALIGN (0x4)
-                0x00000000000006bc                PROVIDE (_data_lma = .)
+.dlalign        0x00000000000006a0        0x0
+                0x00000000000006a0                . = ALIGN (0x4)
+                0x00000000000006a0                PROVIDE (_data_lma = .)
 
-.data           0x0000000020000000        0x0 load address 0x00000000000006bc
+.data           0x0000000020000000        0x0 load address 0x00000000000006a0
  *(.gnu.linkonce.r.*)
  *(.data .data.*)
  *(.gnu.linkonce.d.*)
@@ -561,7 +561,7 @@ END GROUP
                 0x0000000020000000                . = ALIGN (0x4)
                 0x0000000020000000                PROVIDE (_edata = .)
 
-.bss            0x0000000020000000        0x4 load address 0x00000000000006bc
+.bss            0x0000000020000000        0x4 load address 0x00000000000006a0
                 0x0000000020000000                . = ALIGN (0x4)
                 0x0000000020000000                PROVIDE (_sbss = .)
  *(.sbss*)
@@ -586,21 +586,21 @@ END GROUP
                 0x0000000020000800                __freertos_irq_stack_top = .
 OUTPUT(.pio\build\vsdsquadronMini\firmware.elf elf32-littleriscv)
 
-.debug_line     0x0000000000000000     0x1eae
+.debug_line     0x0000000000000000     0x1eb0
  .debug_line    0x0000000000000000      0x188 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
  .debug_line    0x0000000000000188      0x3b3 .pio\build\vsdsquadronMini\FrameworkNoneOSSSystem\system_ch32v00x.o
  .debug_line    0x000000000000053b       0x98 .pio\build\vsdsquadronMini\FrameworkInitFini\cpp_support.o
  .debug_line    0x00000000000005d3      0x48b .pio\build\vsdsquadronMini\src\gpio.o
- .debug_line    0x0000000000000a5e      0x673 .pio\build\vsdsquadronMini\src\main.o
- .debug_line    0x00000000000010d1      0xddd .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
+ .debug_line    0x0000000000000a5e      0x675 .pio\build\vsdsquadronMini\src\main.o
+ .debug_line    0x00000000000010d3      0xddd .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
 
-.debug_info     0x0000000000000000     0x1812
+.debug_info     0x0000000000000000     0x17fb
  .debug_info    0x0000000000000000       0x22 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
  .debug_info    0x0000000000000022      0x27c .pio\build\vsdsquadronMini\FrameworkNoneOSSSystem\system_ch32v00x.o
  .debug_info    0x000000000000029e       0x46 .pio\build\vsdsquadronMini\FrameworkInitFini\cpp_support.o
  .debug_info    0x00000000000002e4      0x307 .pio\build\vsdsquadronMini\src\gpio.o
- .debug_info    0x00000000000005eb      0xa49 .pio\build\vsdsquadronMini\src\main.o
- .debug_info    0x0000000000001034      0x7de .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
+ .debug_info    0x00000000000005eb      0xa32 .pio\build\vsdsquadronMini\src\main.o
+ .debug_info    0x000000000000101d      0x7de .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
 
 .debug_abbrev   0x0000000000000000      0x83b
  .debug_abbrev  0x0000000000000000       0x12 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o

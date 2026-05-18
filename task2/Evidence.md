@@ -33,10 +33,10 @@ Author: Rushil Rai
 
 ### Photo — Board with LED Blinking
 ![Photo of the board](IMG_20260517_122937-1.jpg)
-> Photograph showing the VSDSquadron Mini board. The onboard LED (near the CH32V003F4U6 
+> Photograph showing the VSDSquadron Mini board.
 
 ### Video — LED Blink
-> [https://drive.google.com/file/d/1l4dPLskBvNlhxPzHHhfJKTqWoAQj0xlw/view?usp=sharing]
+> [https://drive.google.com/file/d/1KfsUONo0Hm4ltFkhr6v6HbX1zBkseOf-/view?usp=sharing]
 
 
 ---

@@ -2,7 +2,6 @@
 #include "gpio.h"
 
 #define BOARD_NAME      "VSDSquadron Mini (CH32V003F4U6)"
-#define FW_VERSION      "v1.0.0"
 #define BLINK_PERIOD_MS  500u
 
 volatile uint32_t millis = 0;
@@ -66,7 +65,6 @@ static void print_banner(void)
     uart_println("========================================");
     uart_println("  VSDSquadron Mini - Firmware Task 2");
     uart_println("  Board   : " BOARD_NAME);
-    uart_println("  Version : " FW_VERSION);
     uart_println("  Author  : Rushil Rai");
     uart_println("  UART TX : PD5  |  LED : PD6");
     uart_println("========================================");
