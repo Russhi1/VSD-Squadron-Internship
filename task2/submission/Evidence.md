@@ -8,7 +8,7 @@ Author: Rushil Rai
 
 ### Serial Terminal Screenshot
 
-![Expected output to capture:](<Screenshot 2026-05-17 151427.png>)
+![Expected output to capture:] !(<Screenshot 2026-05-17 151427.png>)
 
 ### Serial Terminal Video
 [https://drive.google.com/file/d/1l4dPLskBvNlhxPzHHhfJKTqWoAQj0xlw/view?usp=sharing]
@@ -30,7 +30,7 @@ Author: Rushil Rai
 | Toggle period | 500ms |
 
 ### Photo — Board with LED Blinking
-![Photo of the board](IMG_20260517_122937-1.jpg)
+![Photo of the board]!(IMG_20260517_122937-1.jpg)
 
 ### Video — LED Blink
 > [https://drive.google.com/file/d/1RXXQVeLb_kG5dfMkFSXzIN68Anepsg35/view?usp=sharing]
@@ -44,7 +44,7 @@ Author: Rushil Rai
 1. Flashed firmware via `pio run --target upload`.
 2. Opened serial monitor at **115200 baud, 8N1** using `pio device monitor`.
 3. On reset, the startup banner appeared immediately — confirming UART initialisation runs before the main loop.
-![screenshot of UART](<Screenshot 2026-05-18 080124.png>)
+![screenshot of UART]!(<Screenshot 2026-05-18 080124.png>)
 4. Counter lines began printing every 500ms and continued indefinitely.
 5. The millis timestamp was cross-checked: line N appears at approximately N × 500ms after boot, confirming the SysTick timer is correct at 24MHz.
 
