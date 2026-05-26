@@ -1,96 +1,102 @@
 
+
 #include <ch32v00x.h>
 #include "gpio.h"
 #include "uart.h"
 
-/* 1 ms time base via SysTick */
+/* -----------------------------------------------------------------------
+ * SysTick — 1 ms time base
+ * CMP = 24 000 - 1 gives exactly 1 ms at 24 MHz.
+ * volatile: variable can change inside the ISR at any time.
+ * ---------------------------------------------------------------------- */
 volatile uint32_t millis = 0;
+
 void SysTick_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void SysTick_Handler(void) { SysTick->SR = 0; millis++; }
 
 static void systick_init(void)
 {
-    SysTick->CTLR = 0; SysTick->SR = 0; SysTick->CNT = 0;
+    SysTick->CTLR = 0;
+    SysTick->SR   = 0;
+    SysTick->CNT  = 0;
     SysTick->CMP  = 24000 - 1;
     NVIC_EnableIRQ(SysTicK_IRQn);
     SysTick->CTLR = 0xF;
     __enable_irq();
 }
 
-static void delay_ms(uint32_t ms)
-{
-    uint32_t start = millis;
-    while ((millis - start) < ms);
-}
-
+/* -----------------------------------------------------------------------
+ * Main
+ * ---------------------------------------------------------------------- */
 int main(void)
 {
+    /* Initialise peripherals */
     systick_init();
     uart_init(115200);
     gpio_init(PORT_D, LED_PIN, GPIO_OUTPUT);
-    gpio_clear(PORT_D, LED_PIN);
+    gpio_init(PORT_D, BTN_PIN, GPIO_INPUT_PU);
+    gpio_write(PORT_D, LED_PIN, GPIO_LOW);   /* LED starts OFF */
 
-    uart_println("========================================");
-    uart_println("  Advanced GPIO Library Demo");
+    /* Startup banner */
+    uart_println("=========================================");
+    uart_println("  Advanced GPIO Library — Press Button Demo");
     uart_println("  VSDSquadron Mini | CH32V003F4U6");
-    uart_println("========================================");
-    uart_println("[INIT] SysTick : 1 ms tick active");
-    uart_println("[INIT] UART    : PD5, 115200 baud, 8N1");
-    uart_println("[INIT] LED     : PD6, output, starts OFF");
-    uart_println("----------------------------------------");
+    uart_println("=========================================");
+    uart_println("[INIT] SysTick  : 1 ms tick active");
+    uart_println("[INIT] UART     : PD5, 115200 baud, 8N1");
+    uart_println("[INIT] LED      : PD6, output, starts OFF");
+    uart_println("[INIT] Button   : PD4, pull-up, active LOW");
+    uart_println("[INIT] Debounce : 5 samples x ~40 us each");
+    uart_println("-----------------------------------------");
+    uart_println("[INFO] Press the button to toggle the LED");
+    uart_println("-----------------------------------------");
 
-    /* --- Part 1: GPIO Read API test (no wires needed) --- */
-    uart_println("\n--- Part 1: GPIO Read Test (Wire-Free) ---");
-
-    gpio_init(PORT_C, 4, GPIO_INPUT_PU);
-    delay_ms(10);
-    uart_print("[READ] PC4 pull-up   -> ");
-    uart_println(gpio_read(PORT_C, 4) == GPIO_HIGH ? "HIGH [PASS]" : "LOW  [FAIL]");
-
-    gpio_init(PORT_C, 4, GPIO_INPUT_PD);
-    delay_ms(10);
-    uart_print("[READ] PC4 pull-down -> ");
-    uart_println(gpio_read(PORT_C, 4) == GPIO_LOW ? "LOW  [PASS]" : "HIGH [FAIL]");
-
-    uart_println("--- Part 1 complete ---");
-
-    /* --- Part 2: LED pattern loop --- */
-    uart_println("\n--- Part 2: LED Pattern Demo ---");
-
-    uint32_t cycle = 1;
+    /* State tracking */
+    uint8_t  prev_btn    = GPIO_HIGH;   /* button starts released */
+    uint8_t  led_state   = GPIO_LOW;    /* LED starts OFF         */
+    uint32_t press_count = 0;
+    uint32_t press_time  = 0;
 
     while (1)
     {
-        uart_print("\n=== Cycle "); uart_print_num(cycle);
-        uart_print(" | t = ");     uart_print_num(millis);
-        uart_println(" ms ===");
+        /*
+         * gpio_debounce_read() takes 5 samples with ~40 µs between each.
+         * Returns GPIO_HIGH / GPIO_LOW when stable, or
+         * GPIO_DEBOUNCE_UNSTABLE (0xFF) when the pin is still bouncing.
+         * Unstable readings are ignored so one press = one event.
+         */
+        uint8_t btn = gpio_debounce_read(PORT_D, BTN_PIN, 5);
 
-        /* Phase 1 — rapid strobe (gpio_toggle) */
-        uart_println("[P1] Rapid Strobe (gpio_toggle x6)");
-        for (int i = 0; i < 6; i++) { gpio_toggle(PORT_D, LED_PIN); delay_ms(100); }
-        gpio_clear(PORT_D, LED_PIN);
-        delay_ms(500);
+        if (btn == GPIO_DEBOUNCE_UNSTABLE) continue;
 
-        /* Phase 2 — SOS (gpio_set / gpio_clear) */
-        uart_println("[P2] SOS Pattern (gpio_set / gpio_clear)");
+        /* Falling edge — button pressed (HIGH → LOW) */
+        if (btn == GPIO_LOW && prev_btn == GPIO_HIGH)
+        {
+            press_count++;
+            press_time = millis;
 
-        uart_println("  S: short short short");
-        for (int i = 0; i < 3; i++)
-        { gpio_set(PORT_D, LED_PIN); delay_ms(150); gpio_clear(PORT_D, LED_PIN); delay_ms(150); }
-        delay_ms(300);
+            /* Toggle LED using gpio_write */
+            led_state = (led_state == GPIO_HIGH) ? GPIO_LOW : GPIO_HIGH;
+            gpio_write(PORT_D, LED_PIN, led_state);
 
-        uart_println("  O: long  long  long");
-        for (int i = 0; i < 3; i++)
-        { gpio_set(PORT_D, LED_PIN); delay_ms(600); gpio_clear(PORT_D, LED_PIN); delay_ms(150); }
-        delay_ms(300);
+            uart_print("[PRESS]   #");
+            uart_print_num(press_count);
+            uart_print("  |  t = ");
+            uart_print_num(millis);
+            uart_print(" ms  |  LED = ");
+            uart_println(led_state ? "ON " : "OFF");
+        }
 
-        uart_println("  S: short short short");
-        for (int i = 0; i < 3; i++)
-        { gpio_set(PORT_D, LED_PIN); delay_ms(150); gpio_clear(PORT_D, LED_PIN); delay_ms(150); }
+        /* Rising edge — button released (LOW → HIGH) */
+        if (btn == GPIO_HIGH && prev_btn == GPIO_LOW)
+        {
+            uart_print("[RELEASE]     |  t = ");
+            uart_print_num(millis);
+            uart_print(" ms  |  held = ");
+            uart_print_num(millis - press_time);
+            uart_println(" ms");
+        }
 
-        uart_print("[P2] Done | t = "); uart_print_num(millis); uart_println(" ms");
-        uart_println("Waiting 2s...");
-        delay_ms(2000);
-        cycle++;
+        prev_btn = btn;
     }
 }
