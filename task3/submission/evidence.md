@@ -137,9 +137,7 @@
 
 ### Photo / Video
 
-<!-- Insert photo here, or link to video:
-![Hardware photo](./photos/hardware.jpg)
-or
+[Photo]![alt text](IMG_20260526_113511.jpg)
 [Video link](https://youtube.com/...)
 -->
 
