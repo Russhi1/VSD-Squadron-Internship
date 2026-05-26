@@ -1,19 +1,18 @@
+
+
 #include <ch32v00x.h>
 #include "gpio.h"
 #include "uart.h"
 
-#define BOARD_NAME       "VSDSquadron Mini (CH32V003F4U6)"
-#define FW_VERSION       "v1.0.0"
-#define BLINK_PERIOD_MS   500u
-
+/* -----------------------------------------------------------------------
+ * SysTick — 1 ms time base
+ * CMP = 24 000 - 1 gives exactly 1 ms at 24 MHz.
+ * volatile: variable can change inside the ISR at any time.
+ * ---------------------------------------------------------------------- */
 volatile uint32_t millis = 0;
 
 void SysTick_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
-void SysTick_Handler(void)
-{
-    SysTick->SR = 0;
-    millis++;
-}
+void SysTick_Handler(void) { SysTick->SR = 0; millis++; }
 
 static void systick_init(void)
 {
@@ -26,48 +25,78 @@ static void systick_init(void)
     __enable_irq();
 }
 
-static void print_banner(void)
-{
-    uart_println("========================================");
-    uart_println("  VSDSquadron Mini - Firmware Task 2");
-    uart_println("  Board   : " BOARD_NAME);
-    uart_println("  Version : " FW_VERSION);
-    uart_println("  Author  : Rushil Rai");
-    uart_println("  UART TX : PD5  |  LED : PD6");
-    uart_println("========================================");
-    uart_println("[BOOT] System initialised.");
-    uart_println("");
-}
-
+/* -----------------------------------------------------------------------
+ * Main
+ * ---------------------------------------------------------------------- */
 int main(void)
 {
-    uint32_t last_toggle  = 0;
-    uint32_t loop_counter = 0;
-
+    /* Initialise peripherals */
     systick_init();
     uart_init(115200);
     gpio_init(PORT_D, LED_PIN, GPIO_OUTPUT);
+    gpio_init(PORT_D, BTN_PIN, GPIO_INPUT_PU);
+    gpio_write(PORT_D, LED_PIN, GPIO_LOW);   /* LED starts OFF */
 
-    print_banner();
+    /* Startup banner */
+    uart_println("=========================================");
+    uart_println("  Advanced GPIO Library — Press Button Demo");
+    uart_println("  VSDSquadron Mini | CH32V003F4U6");
+    uart_println("=========================================");
+    uart_println("[INIT] SysTick  : 1 ms tick active");
+    uart_println("[INIT] UART     : PD5, 115200 baud, 8N1");
+    uart_println("[INIT] LED      : PD6, output, starts OFF");
+    uart_println("[INIT] Button   : PD4, pull-up, active LOW");
+    uart_println("[INIT] Debounce : 5 samples x ~40 us each");
+    uart_println("-----------------------------------------");
+    uart_println("[INFO] Press the button to toggle the LED");
+    uart_println("-----------------------------------------");
+
+    /* State tracking */
+    uint8_t  prev_btn    = GPIO_HIGH;   /* button starts released */
+    uint8_t  led_state   = GPIO_LOW;    /* LED starts OFF         */
+    uint32_t press_count = 0;
+    uint32_t press_time  = 0;
 
     while (1)
     {
-        if ((millis - last_toggle) >= BLINK_PERIOD_MS)
+        /*
+         * gpio_debounce_read() takes 5 samples with ~40 µs between each.
+         * Returns GPIO_HIGH / GPIO_LOW when stable, or
+         * GPIO_DEBOUNCE_UNSTABLE (0xFF) when the pin is still bouncing.
+         * Unstable readings are ignored so one press = one event.
+         */
+        uint8_t btn = gpio_debounce_read(PORT_D, BTN_PIN, 5);
+
+        if (btn == GPIO_DEBOUNCE_UNSTABLE) continue;
+
+        /* Falling edge — button pressed (HIGH → LOW) */
+        if (btn == GPIO_LOW && prev_btn == GPIO_HIGH)
         {
-            last_toggle = millis;
-            loop_counter++;
+            press_count++;
+            press_time = millis;
 
-            gpio_toggle(PORT_D, LED_PIN);
+            /* Toggle LED using gpio_write */
+            led_state = (led_state == GPIO_HIGH) ? GPIO_LOW : GPIO_HIGH;
+            gpio_write(PORT_D, LED_PIN, led_state);
 
-            uart_print("[");
-            uart_print_uint(millis);
-            uart_print("ms] Counter: ");
-            uart_print_uint(loop_counter);
-
-            if (loop_counter % 2 == 1)
-                uart_println("  LED: ON");
-            else
-                uart_println("  LED: OFF");
+            uart_print("[PRESS]   #");
+            uart_print_num(press_count);
+            uart_print("  |  t = ");
+            uart_print_num(millis);
+            uart_print(" ms  |  LED = ");
+            uart_println(led_state ? "ON " : "OFF");
         }
+
+        /* Rising edge — button released (LOW → HIGH) */
+        if (btn == GPIO_HIGH && prev_btn == GPIO_LOW)
+        {
+            uart_print("[RELEASE]     |  t = ");
+            uart_print_num(millis);
+            uart_print(" ms  |  held = ");
+            uart_print_num(millis - press_time);
+            uart_println(" ms");
+        }
+
+        prev_btn = btn;
     }
 }

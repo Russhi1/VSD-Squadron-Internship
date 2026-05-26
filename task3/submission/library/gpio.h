@@ -14,9 +14,9 @@
 #define PORT_C  GPIOC
 #define PORT_D  GPIOD
 
-/* Pin modes — passed to gpio_init() */
+/* Pin modes */
 #define GPIO_OUTPUT    0   /* Push-pull output, 50 MHz */
-#define GPIO_INPUT     1   /* Floating input, no pull  */
+#define GPIO_INPUT     1   /* Floating input           */
 #define GPIO_INPUT_PU  2   /* Input with pull-up       */
 #define GPIO_INPUT_PD  3   /* Input with pull-down     */
 
@@ -27,20 +27,11 @@
 /* Returned by gpio_debounce_read() when pin is still bouncing */
 #define GPIO_DEBOUNCE_UNSTABLE  0xFF
 
-/* Onboard peripherals */
+/* Common pins */
 #define LED_PIN  6   /* PD6 — onboard LED    */
 #define BTN_PIN  4   /* PD4 — onboard button */
 
-/*
- * gpio_init    — enable port clock and configure pin direction/pull mode
- * gpio_write   — drive pin HIGH or LOW
- * gpio_set     — drive pin HIGH  (shorthand)
- * gpio_clear   — drive pin LOW   (shorthand)
- * gpio_toggle  — flip current pin level
- * gpio_read    — return live logic level of input pin (1 or 0)
- * gpio_debounce_read — read pin with bounce filtering;
- *                      returns GPIO_DEBOUNCE_UNSTABLE if still bouncing
- */
+/* API */
 void    gpio_init          (GPIO_TypeDef *port, uint8_t pin, uint8_t mode);
 void    gpio_write         (GPIO_TypeDef *port, uint8_t pin, uint8_t value);
 void    gpio_set           (GPIO_TypeDef *port, uint8_t pin);

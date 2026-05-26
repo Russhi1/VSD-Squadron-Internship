@@ -8,8 +8,9 @@ Author: Rushil Rai
 
 ### Serial Terminal Screenshot
 
-[Expected output to capture:]<img width="1919" height="1079" alt="Screenshot 2026-05-17 151427" src="https://github.com/user-attachments/assets/ad8001ef-1392-44c9-bf95-b4a64ba71894" />
 
+[Expected output to capture:]<Screenshot 2026-05-17 151427.png>
+(Task 3: Advanced GPIO Library + Button Demo)
 
 ### Serial Terminal Video
 [https://drive.google.com/file/d/1l4dPLskBvNlhxPzHHhfJKTqWoAQj0xlw/view?usp=sharing]
