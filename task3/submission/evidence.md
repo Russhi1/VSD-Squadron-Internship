@@ -138,7 +138,7 @@
 ### Photo / Video
 
 [Photo]![alt text](IMG_20260526_113511.jpg)
-[Video link](https://youtube.com/...)
+[Video link]
 -->
 
 ---

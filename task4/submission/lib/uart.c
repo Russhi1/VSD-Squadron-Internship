@@ -7,28 +7,13 @@ void uart_init(uint32_t baud)
     /* Enable clocks for GPIOD and USART1 */
     RCC->APB2PCENR |= RCC_APB2Periph_GPIOD | RCC_APB2Periph_USART1;
 
-    /*
-     * PD5 = TX: alternate-function push-pull output (CFGLR value 0xB)
-     * CNF=10 (AF push-pull), MODE=11 (output 50MHz) → 4-bit field = 1011b = 0xB
-     */
+  
     GPIOD->CFGLR &= ~(0xFU << (5 * 4));
     GPIOD->CFGLR |=  (0xBU << (5 * 4));
 
-    /*
-     * PD6 = RX: floating input (CFGLR value 0x4)
-     * CNF=01 (floating input), MODE=00 (input) → 4-bit field = 0100b = 0x4
-     *
-     * NOTE: PD6 is also the onboard LED. When UART RX is active,
-     * PD6 belongs to USART1, not GPIO. Use PC0 for the application LED.
-     */
     GPIOD->CFGLR &= ~(0xFU << (6 * 4));
     GPIOD->CFGLR |=  (0x4U << (6 * 4));
 
-    /*
-     * Baud rate register.
-     * USARTDIV = HCLK / (16 * baud)
-     * The +baud/2 rounds to nearest integer instead of truncating.
-     */
     USART1->BRR = (uint16_t)((24000000UL + baud / 2) / baud);
 
     /* Enable transmitter, receiver, and the USART peripheral itself */
