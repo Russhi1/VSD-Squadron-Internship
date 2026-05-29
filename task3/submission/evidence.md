@@ -138,7 +138,7 @@
 ### Photo / Video
 
 [Photo]![alt text](IMG_20260526_113511.jpg)
-[Video link]
+[Video link] [https://drive.google.com/file/d/1H27UzJ6tOynACGQhs7DEpfTPUpfvJxsz/view?usp=drive_link]
 -->
 
 ---
@@ -160,16 +160,16 @@
  
 ### What was verified on hardware
  
-- [ ] Firmware flashes and boots without errors
-- [ ] Startup banner appears in serial monitor
-- [ ] LED is OFF at startup
-- [ ] LED turns ON on first button press
-- [ ] LED turns OFF on second button press
-- [ ] Press count increments correctly
-- [ ] Timestamps increase monotonically
-- [ ] Hold duration reported correctly
-- [ ] Debounce works — single press produces exactly one log line
-- [ ] All UART output readable at 115200 baud
+- Firmware flashes and boots without errors
+-  Startup banner appears in serial monitor
+-  LED is OFF at startup
+-  LED turns ON on first button press
+-  LED turns OFF on second button press
+-  Press count increments correctly
+-  Timestamps increase monotonically
+-  Hold duration reported correctly
+-  Debounce works — single press produces exactly one log line
+-  All UART output readable at 115200 baud
 ### Debounce verification
  
 Mechanical buttons bounce — the pin rapidly flickers between HIGH and LOW
