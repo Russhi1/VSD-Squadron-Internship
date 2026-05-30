@@ -8,8 +8,9 @@
 Captured via PlatformIO Serial Monitor at 115200 baud.
 Board: VSDSquadron Mini 
 
-!(<Screenshot 2026-05-29 122043.png>)
-!(<Screenshot 2026-05-29 122051.png>)
+<img width="1482" height="572" alt="Screenshot 2026-05-26 111646" src="https://github.com/user-attachments/assets/5cf677c2-6bc7-45ac-9528-4c20b1d45474" />
+<img width="672" height="748" alt="Screenshot 2026-05-29 122043" src="https://github.com/user-attachments/assets/fd9473d0-9b5d-468c-a92c-ab62d3231532" />
+
 
 ## Hardware Verification
 
