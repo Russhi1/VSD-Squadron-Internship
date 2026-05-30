@@ -6,59 +6,23 @@
 ## UART Log
 
 Captured via PlatformIO Serial Monitor at 115200 baud.
-Board: VSDSquadron Mini | Date: [fill in your date]
+Board: VSDSquadron Mini 
 
 ================================
-  Event Queue Framework v1.0
+  Event Queue Framework 
   Project-9  VSDSquadron Mini
 ================================
   Producers: TIMER | BTN | UART
-  Type 'help' for commands
 ================================
 
-[LOW ][TICK] t=1001ms  uptime=1s  led=ON
-[LOW ][TICK] t=2003ms  uptime=2s  led=OFF
-[LOW ][TICK] t=3005ms  uptime=3s  led=ON
-[NORM][BTN ] BUTTON_PRESSED at t=3621ms  led=OFF
-[LOW ][TICK] t=4007ms  uptime=4s  led=ON
-[LOW ][TICK] t=5009ms  uptime=5s  led=ON
-[HIGH][CMD ] "help"
-  Commands:
-    help      - show this list
-    status    - print system state
-    led on    - turn LED on
-    led off   - turn LED off
-    queue     - show queue depth
-[HIGH][CMD ] "status"
-  uptime=6s  led=ON  events=11  dropped=0
-[HIGH][CMD ] "led off"
-  LED -> OFF
-[LOW ][TICK] t=7011ms  uptime=7s  led=ON
-[HIGH][CMD ] "led on"
-  LED -> ON
-[HIGH][CMD ] "queue"
-  depth=0/16
-[NORM][BTN ] BUTTON_PRESSED at t=8203ms  led=OFF
-[NORM][BTN ] BUTTON_PRESSED at t=9901ms  led=ON
-[LOW ][TICK] t=10013ms  uptime=10s  led=ON
-[HIGH][CMD ] "status"
-  uptime=10s  led=ON  events=19  dropped=0
+!(<Screenshot 2026-05-29 122043.png>)
+!(<Screenshot 2026-05-29 122051.png>)
 
-[PASTE YOUR ACTUAL TERMINAL SCREENSHOT OR COPY-PASTE HERE]
+## Hardware Verification
 
----
+Video Demo link [https://drive.google.com/file/d/1jl1jrn7Y9BOLq5asMd16z96OFVaTnE_8/view?usp=sharing]
 
-## Hardware Photo
 
-[ATTACH PHOTO OF BOARD HERE]
-
-Photo must show:
-- VSDSquadron Mini board powered and running
-- External LED on PC0 visibly illuminated
-- USB-serial adapter connected to PD5 (TX) and PD6 (RX)
-- Optional: serial terminal visible on screen in same shot
-
----
 
 ## Brief Verification Notes
 
