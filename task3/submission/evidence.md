@@ -181,14 +181,3 @@ every single button press produced exactly one `[PRESS]` line in the
 serial monitor — no false triggers.
  
 ---
- 
-## 4. Build Log
- 
-> To get this, run `pio run` in the terminal and copy the full output.
-> It should end with `[SUCCESS]` and show three compiled files:
-> `gpio.o`, `uart.o`, and `main.o`.
-> This proves the code compiled without errors before flashing.
- 
-```
-
-```
