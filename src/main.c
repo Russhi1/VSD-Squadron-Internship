@@ -1,246 +1,182 @@
-/*
- * app/main.c
- * Project-9: Event Queue Framework + Demo Application
- * VSD Squadron Mini (CH32V003F4U6)
- *
- * ── PIN ASSIGNMENT ──────────────────────────────────────────────────────
- * PC0  — Application LED output (external LED + 220Ω resistor to GND)
- *         PD6 (onboard LED) is occupied by UART RX in this project.
- * PD4  — Button input (onboard, active-LOW, internal pull-up)
- * PD5  — UART TX  →  USB-serial adapter  →  PC terminal
- * PD6  — UART RX  ←  USB-serial adapter  ←  PC terminal
- *
- * ── UART COMMANDS ────────────────────────────────────────────────────────
- *   help      — list all commands
- *   status    — uptime, LED state, event statistics
- *   led on    — turn LED on
- *   led off   — turn LED off
- *   queue     — current queue depth
- */
 
-#include <ch32v00x.h>
 #include "gpio.h"
-#include "uart.h"
 #include "timer.h"
+#include "uart.h"
 #include "eventq.h"
 
-/* ── Application LED is on PC0 (PD6 is taken by UART RX) ────────────── */
-#define APP_LED_PORT   PORT_C
-#define APP_LED_PIN    0
+/* ── Timing thresholds ──────────────────────────────────────────────── */
+#define LONG_PRESS_MS    500u
+#define DOUBLE_TAP_MS    400u
+#define DEBOUNCE_MS       20u
 
-/* ── Debounce window in milliseconds ─────────────────────────────────── */
-#define DEBOUNCE_MS    50
+/* ── LED blink parameters per event type ────────────────────────────── */
+#define SHORT_ON_MS      200u
+#define LONG_ON_MS      2000u
+#define RAPID_ON_MS       80u
+#define RAPID_OFF_MS      80u
+#define RAPID_COUNT        5u
 
-/* ── Global event queue ──────────────────────────────────────────────── */
+/* ── Shared event queue ──────────────────────────────────────────────── */
 static EventQueue g_queue;
 
-/* ── Application state ───────────────────────────────────────────────── */
-static uint8_t  g_led_state      = 0;
-static uint32_t g_uptime_sec     = 0;
-static uint32_t g_events_total   = 0;
-static uint32_t g_events_dropped = 0;
+/* ── Statistics ─────────────────────────────────────────────────────── */
+static uint32_t g_total_events   = 0u;
+static uint32_t g_dropped_events = 0u;
 
+typedef enum {
+    BTN_IDLE,
+    BTN_PRESSED,
+    BTN_WAIT_SECOND,
+    BTN_CONSUME_SECOND,
+} BtnState;
 
-/* ════════════════════════════════════════════════════════════════════════
- * SECTION 1 — PRODUCERS
- * Poll hardware every loop iteration.
- * Push an event when something noteworthy happens.
- * Never call a handler directly.
- * ════════════════════════════════════════════════════════════════════════ */
+/*
+ * Raw edge data written by EXTI ISR and read by the producer.
+ * volatile prevents compiler from caching these in registers.
+ */
+volatile uint8_t  g_edge_pending   = 0u;  /* 1 when a new edge arrived   */
+volatile uint8_t  g_edge_level     = 1u;  /* GPIO level AFTER the edge   */
+volatile uint32_t g_edge_timestamp = 0u;  /* timer_get_millis() at edge  */
 
-static void producer_timer(void)
+static void button_producer(void)
 {
-    static uint32_t last_tick = 0;
+    static BtnState state       = BTN_IDLE;
+    static uint32_t press_start = 0u;
+    static uint32_t release_t   = 0u;
+    /* Snapshot current raw level once for debounce */
+    static uint8_t  last_raw    = 1u;
+    static uint32_t stable_t    = 0u;
+    static uint8_t  confirmed   = 1u;
+
     uint32_t now = timer_get_millis();
 
-    if ((now - last_tick) >= 1000u) {
-        last_tick = now;
-
-        if (!eventq_push(&g_queue,
-                         EVENT_TIMER_TICK,
-                         PRIORITY_LOW,
-                         now,
-                         (void *)0)) {
-            g_events_dropped++;
-        }
-    }
-}
-
-static void producer_button(void)
-{
-    static uint8_t  confirmed_state = 1;   /* 1 = released (pull-up) */
-    static uint8_t  raw_prev        = 1;
-    static uint32_t bounce_start    = 0;
-
-    uint8_t  raw = gpio_read(PORT_D, BTN_PIN);
-    uint32_t now = timer_get_millis();
-
-    /* Did the raw level just change? Start the debounce timer */
-    if (raw != raw_prev) {
-        raw_prev     = raw;
-        bounce_start = now;
+    /*
+     * Debounce: sample the pin every call; if the raw level has been
+     * stable for DEBOUNCE_MS, update confirmed and act on the edge.
+     */
+    uint8_t raw = gpio_read(BTN_PORT, BTN_PIN);
+    if (raw != last_raw) {
+        last_raw = raw;
+        stable_t = now;
     }
 
-    /* Has the level been stable for DEBOUNCE_MS? */
-    if ((now - bounce_start) >= DEBOUNCE_MS) {
-        if (raw != confirmed_state) {
-            confirmed_state = raw;
+    if ((now - stable_t) >= DEBOUNCE_MS) {
+        if (raw != confirmed) {
+            /* A real edge has settled */
+            confirmed = raw;
 
-            /* Falling edge = GPIO_LOW = button physically pressed */
-            if (confirmed_state == GPIO_LOW) {
-                if (!eventq_push(&g_queue,
-                                 EVENT_BUTTON_PRESSED,
-                                 PRIORITY_NORMAL,
-                                 now,
-                                 (void *)0)) {
-                    g_events_dropped++;
+            switch (state) {
+
+            case BTN_IDLE:
+                if (confirmed == GPIO_LOW) {
+                    /* Falling edge: button pressed */
+                    press_start = now;
+                    state = BTN_PRESSED;
                 }
+                break;
+
+            case BTN_PRESSED:
+                if (confirmed == GPIO_HIGH) {
+                    /* Rising edge: button released */
+                    release_t = now;
+                    uint32_t hold = release_t - press_start;
+                    if (hold >= LONG_PRESS_MS) {
+                        /* Held long enough — classify immediately */
+                        if (!eventq_push(&g_queue, EVT_LONG_PRESS, release_t)) {
+                            g_dropped_events++;
+                        }
+                        state = BTN_IDLE;
+                    } else {
+                        /* Short release — wait to see if second tap follows */
+                        state = BTN_WAIT_SECOND;
+                    }
+                }
+                break;
+
+            case BTN_WAIT_SECOND:
+                if (confirmed == GPIO_LOW) {
+                    /* Second press arrived in time */
+                    if (!eventq_push(&g_queue, EVT_DOUBLE_TAP, now)) {
+                        g_dropped_events++;
+                    }
+                    state = BTN_CONSUME_SECOND;
+                }
+                break;
+
+            case BTN_CONSUME_SECOND:
+                if (confirmed == GPIO_HIGH) {
+                    /* Absorb the release of the second tap */
+                    state = BTN_IDLE;
+                }
+                break;
+
+            default:
+                state = BTN_IDLE;
+                break;
             }
         }
     }
-}
 
-static void producer_uart(void)
-{
-    static char    cmd_buf[EVENTQ_CMD_LEN];
-    static uint8_t cmd_idx = 0;
-
-    while (uart_rx_available()) {
-        char c = uart_read_byte();
-
-        if (c == '\r' || c == '\n') {
-            if (cmd_idx > 0) {
-                cmd_buf[cmd_idx] = '\0';
-                if (!eventq_push(&g_queue,
-                                 EVENT_UART_CMD,
-                                 PRIORITY_HIGH,
-                                 timer_get_millis(),
-                                 cmd_buf)) {
-                    g_events_dropped++;
-                }
-                cmd_idx = 0;
+    /*
+     * Timeout check for WAIT_SECOND: if DOUBLE_TAP_MS has expired
+     * without a second press, emit a short press and return to IDLE.
+     */
+    if (state == BTN_WAIT_SECOND) {
+        if ((now - release_t) >= DOUBLE_TAP_MS) {
+            if (!eventq_push(&g_queue, EVT_SHORT_PRESS, release_t)) {
+                g_dropped_events++;
             }
-        } else if (cmd_idx < (EVENTQ_CMD_LEN - 1u)) {
-            cmd_buf[cmd_idx++] = c;
+            state = BTN_IDLE;
         }
-        /* else: buffer full, silently drop the character */
     }
 }
 
 
-/* ════════════════════════════════════════════════════════════════════════
- * SECTION 2 — HANDLERS
- * Receive a completed event and act on it.
- * May call any driver API.
- * Must never access hardware registers directly.
- * ════════════════════════════════════════════════════════════════════════ */
-
-/* Small helper: compare two null-terminated strings without <string.h> */
-static uint8_t str_eq(const char *a, const char *b)
+static void delay_ms(uint32_t ms)
 {
-    while (*a && *b) {
-        if (*a != *b) return 0;
-        a++;
-        b++;
-    }
-    return (*a == '\0' && *b == '\0') ? 1u : 0u;
+    uint32_t start = timer_get_millis();
+    while ((timer_get_millis() - start) < ms);
 }
 
-/* Helper: convert priority to a printable 4-char label */
-static const char *priority_label(EventPriority p)
+static void handler_short_press(const Event *e)
 {
-    switch (p) {
-        case PRIORITY_HIGH:   return "HIGH";
-        case PRIORITY_NORMAL: return "NORM";
-        case PRIORITY_LOW:    return "LOW ";
-        default:              return "??? ";
-    }
-}
-
-static void handler_timer_tick(const Event *e)
-{
-    g_uptime_sec++;
-
-    /* 1-second heartbeat toggle */
-    g_led_state = !g_led_state;
-    gpio_write(APP_LED_PORT, APP_LED_PIN,
-               g_led_state ? GPIO_HIGH : GPIO_LOW);
-
-    uart_print("[LOW ][TICK] t=");
+    uart_print("[DISPATCH] EVT_SHORT_PRESS  t=");
     uart_print_num(e->timestamp);
-    uart_print("ms  uptime=");
-    uart_print_num(g_uptime_sec);
-    uart_print("s  led=");
-    uart_println(g_led_state ? "ON" : "OFF");
+    uart_println("ms  -> single blink 200ms");
+
+    gpio_write(LED_PORT, LED_PIN, GPIO_HIGH);
+    delay_ms(SHORT_ON_MS);
+    gpio_write(LED_PORT, LED_PIN, GPIO_LOW);
 }
 
-static void handler_button_pressed(const Event *e)
+static void handler_long_press(const Event *e)
 {
-    /* Button toggles the LED independently of the timer heartbeat */
-    g_led_state = !g_led_state;
-    gpio_write(APP_LED_PORT, APP_LED_PIN,
-               g_led_state ? GPIO_HIGH : GPIO_LOW);
-
-    uart_print("[NORM][BTN ] BUTTON_PRESSED at t=");
+    uart_print("[DISPATCH] EVT_LONG_PRESS   t=");
     uart_print_num(e->timestamp);
-    uart_print("ms  led=");
-    uart_println(g_led_state ? "ON" : "OFF");
+    uart_println("ms  -> LED ON for 2 s");
+
+    gpio_write(LED_PORT, LED_PIN, GPIO_HIGH);
+    delay_ms(LONG_ON_MS);
+    gpio_write(LED_PORT, LED_PIN, GPIO_LOW);
+
+    uart_println("[DISPATCH] EVT_LONG_PRESS   -> LED OFF");
 }
 
-static void handler_uart_cmd(const Event *e)
+static void handler_double_tap(const Event *e)
 {
-    uart_print("[HIGH][CMD ] \"");
-    uart_print(e->cmd);
-    uart_println("\"");
+    uart_print("[DISPATCH] EVT_DOUBLE_TAP   t=");
+    uart_print_num(e->timestamp);
+    uart_println("ms  -> 5x rapid blink");
 
-    if (str_eq(e->cmd, "help")) {
-        uart_println("  Commands:");
-        uart_println("    help      - show this list");
-        uart_println("    status    - print system state");
-        uart_println("    led on    - turn LED on");
-        uart_println("    led off   - turn LED off");
-        uart_println("    queue     - show queue depth");
-    }
-    else if (str_eq(e->cmd, "status")) {
-        uart_print("  uptime=");
-        uart_print_num(g_uptime_sec);
-        uart_print("s  led=");
-        uart_print(g_led_state ? "ON" : "OFF");
-        uart_print("  events=");
-        uart_print_num(g_events_total);
-        uart_print("  dropped=");
-        uart_print_num(g_events_dropped);
-        uart_println("");
-    }
-    else if (str_eq(e->cmd, "led on")) {
-        g_led_state = 1;
-        gpio_write(APP_LED_PORT, APP_LED_PIN, GPIO_HIGH);
-        uart_println("  LED -> ON");
-    }
-    else if (str_eq(e->cmd, "led off")) {
-        g_led_state = 0;
-        gpio_write(APP_LED_PORT, APP_LED_PIN, GPIO_LOW);
-        uart_println("  LED -> OFF");
-    }
-    else if (str_eq(e->cmd, "queue")) {
-        uart_print("  depth=");
-        uart_print_num(eventq_depth(&g_queue));
-        uart_print("/");
-        uart_print_num(EVENTQ_SIZE);
-        uart_println("");
-    }
-    else {
-        uart_print("  [ERR] unknown command: \"");
-        uart_print(e->cmd);
-        uart_println("\"  (type 'help')");
+    for (uint8_t i = 0u; i < RAPID_COUNT; i++) {
+        gpio_write(LED_PORT, LED_PIN, GPIO_HIGH);
+        delay_ms(RAPID_ON_MS);
+        gpio_write(LED_PORT, LED_PIN, GPIO_LOW);
+        delay_ms(RAPID_OFF_MS);
     }
 }
 
 
-/* ════════════════════════════════════════════════════════════════════════
- * SECTION 3 — DISPATCHER
- * Pops one event per call, measures latency, routes to correct handler.
- * ════════════════════════════════════════════════════════════════════════ */
 
 static void dispatch_one(void)
 {
@@ -249,67 +185,80 @@ static void dispatch_one(void)
         return;   /* queue empty this iteration */
     }
 
-    g_events_total++;
-
-    /*
-     * Latency = time between when the event was enqueued and now.
-     * Under normal load this will be 0-1 ms.
-     * If it grows, it means the main loop is blocked somewhere.
-     */
-    uint32_t latency = timer_get_millis() - e.enqueue_time;
-    (void)latency;   /* used in log lines below */
+    g_total_events++;
 
     switch (e.type) {
-        case EVENT_TIMER_TICK:
-            handler_timer_tick(&e);
-            break;
-        case EVENT_BUTTON_PRESSED:
-            handler_button_pressed(&e);
-            break;
-        case EVENT_UART_CMD:
-            handler_uart_cmd(&e);
-            break;
+        case EVT_SHORT_PRESS:  handler_short_press(&e); break;
+        case EVT_LONG_PRESS:   handler_long_press(&e);  break;
+        case EVT_DOUBLE_TAP:   handler_double_tap(&e);  break;
         default:
-            uart_println("[WARN] unknown event type ignored");
+            uart_println("[DISPATCH] WARNING: unknown event type");
             break;
     }
 }
 
+static void print_status(void)
+{
+    uart_print("[STATUS]   total_dispatched=");
+    uart_print_num(g_total_events);
+    uart_print("  queue_depth=");
+    uart_print_num(eventq_depth(&g_queue));
+    uart_print("/");
+    uart_print_num(EVENTQ_SIZE);
+    uart_print("  dropped=");
+    uart_print_num(g_dropped_events);
+    uart_println("");
+}
 
-/* ════════════════════════════════════════════════════════════════════════
- * SECTION 4 — MAIN
- * ════════════════════════════════════════════════════════════════════════ */
+{
+    while (uart_rx_available()) {
+        char c = uart_read_byte();
+        switch (c) {
+            case 's': case 'S':
+                print_status();
+                break;
+            case 'h': case 'H':
+                uart_println("[HELP]     s = status,  h = help");
+                uart_println("[HELP]     Press button: short/long/double-tap");
+                break;
+            default:
+                /* ignore other characters */
+                break;
+        }
+    }
+}
 
 int main(void)
 {
-    /* ── Hardware initialisation ── */
-    /*
-     * GPIO_MODE_OUTPUT / GPIO_MODE_INPUT_PU  ← new constant names in gpio.h
-     * Do NOT use GPIO_OUTPUT or GPIO_INPUT_PU — those are the old names
-     * and are no longer defined.
-     */
-    gpio_init(APP_LED_PORT, APP_LED_PIN, GPIO_MODE_OUTPUT);
-    gpio_init(PORT_D, BTN_PIN, GPIO_MODE_INPUT_PU);
-    uart_init(115200);
+    /* ── Hardware init ── */
+    gpio_init(LED_PORT, LED_PIN,  GPIO_MODE_OUTPUT);
+    gpio_init(BTN_PORT, BTN_PIN,  GPIO_MODE_INPUT_PU);
+    uart_init(115200u);
     timer_init();
 
-    /* ── Framework initialisation ── */
+    /* ── Framework init ── */
     eventq_init(&g_queue);
 
-    /* ── Start with LED off ── */
-    gpio_write(APP_LED_PORT, APP_LED_PIN, GPIO_LOW);
+    /* ── LED off on startup ── */
+    gpio_write(LED_PORT, LED_PIN, GPIO_LOW);
 
     /* ── Startup banner ── */
-    uart_println("================================");
-    uart_println("  Event Queue Framework v1.0");
-    uart_println("  Project-9  VSDSquadron Mini");
-    uart_println("================================");
-    uart_println("  Producers: TIMER | BTN | UART");
+    uart_println("========================================");
+    uart_println("  Smart Button Controller");
+    uart_println("  VSDSquadron Mini — CH32V003");
+    uart_println("========================================");
+    uart_println("[INFO]  SHORT press  -> single blink");
+    uart_println("[INFO]  LONG  press  -> LED ON 2 s");
+    uart_println("[INFO]  DOUBLE tap   -> 5x rapid blink");
+    uart_println("[INFO]  Type 'h' for help, 's' for status");
+    uart_println("----------------------------------------");
 
+    /* ── Main loop ── */
     while (1) {
-        producer_timer();
-        producer_button();
-        producer_uart();
-        dispatch_one();
+        button_producer();   /* Sample button; push event when gesture complete */
+        handle_uart_input(); /* Drain UART RX; respond to 's', 'h'              */
+        dispatch_one();      /* Pop one event (if any); call its handler         */
     }
+
+    return 0;
 }

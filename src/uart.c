@@ -1,85 +1,93 @@
-/* uart.c */
+/*
+ * uart.c — USART1 driver implementation for CH32V003
+ *
+ * Register map (CH32V003 Reference Manual v1.9, Section 12.10):
+ *   USART1 base: 0x40013800
+ *   +0x00 STATR  — status (TXE, TC, RXNE, …)
+ *   +0x04 DATAR  — data (read = RDR, write = TDR), 9 bits wide
+ *   +0x08 BRR    — baud rate: DIV_Mantissa[15:4] | DIV_Fraction[3:0]
+ *   +0x0C CTLR1  — UE | M | TE | RE | TXEIE | RXNEIE …
+ *
+ * PD5 is USART1_TX (AF push-pull):  CFGLR CNF=10 MODE=11 → nibble 0xB
+ * PD6 is USART1_RX (floating input): CFGLR CNF=01 MODE=00 → nibble 0x4
+ *
+ * Baud rate formula (RM Section 12.3):
+ *   USARTDIV = HCLK / (16 * baud)
+ *   BRR[15:4] = integer part, BRR[3:0] = fractional part (×16)
+ *   Simplified: BRR = round(HCLK / baud) when using integer-only USARTDIV
+ */
+
 #include "uart.h"
 #include <ch32v00x.h>
 
-void uart_init(uint32_t baud)
+/* ── Internal: transmit one byte, blocking on TXE ─────────────────── */
+static void _send(char c)
 {
-    /* Enable clocks for GPIOD and USART1 */
-    RCC->APB2PCENR |= RCC_APB2Periph_GPIOD | RCC_APB2Periph_USART1;
-
-    /*
-     * PD5 = TX: alternate-function push-pull output (CFGLR value 0xB)
-     * CNF=10 (AF push-pull), MODE=11 (output 50MHz) → 4-bit field = 1011b = 0xB
-     */
-    GPIOD->CFGLR &= ~(0xFU << (5 * 4));
-    GPIOD->CFGLR |=  (0xBU << (5 * 4));
-
-    /*
-     * PD6 = RX: floating input (CFGLR value 0x4)
-     * CNF=01 (floating input), MODE=00 (input) → 4-bit field = 0100b = 0x4
-     *
-     * NOTE: PD6 is also the onboard LED. When UART RX is active,
-     * PD6 belongs to USART1, not GPIO. Use PC0 for the application LED.
-     */
-    GPIOD->CFGLR &= ~(0xFU << (6 * 4));
-    GPIOD->CFGLR |=  (0x4U << (6 * 4));
-
-    /*
-     * Baud rate register.
-     * USARTDIV = HCLK / (16 * baud)
-     * The +baud/2 rounds to nearest integer instead of truncating.
-     */
-    USART1->BRR = (uint16_t)((24000000UL + baud / 2) / baud);
-
-    /* Enable transmitter, receiver, and the USART peripheral itself */
-    USART1->CTLR1 = USART_CTLR1_TE | USART_CTLR1_RE | USART_CTLR1_UE;
+    while (!(USART1->STATR & USART_FLAG_TXE));
+    USART1->DATAR = (uint16_t)(uint8_t)c;
 }
 
-static void _send_byte(char c)
+/* ── Public API ─────────────────────────────────────────────────────── */
+
+void uart_init(uint32_t baud)
 {
-    /* Wait until the TX data register is empty, then write */
-    while (!(USART1->STATR & USART_STATR_TXE));
-    USART1->DATAR = (uint16_t)c;
+    /* 1. Enable peripheral clocks */
+    RCC->APB2PCENR |= RCC_APB2Periph_GPIOD | RCC_APB2Periph_USART1
+                    | RCC_APB2Periph_AFIO;
+
+    /* 2. PD5 = TX: alternate-function push-pull output, 30 MHz
+     *    nibble value = CNF[1:0]=10, MODE[1:0]=11 → 0xB           */
+    GPIOD->CFGLR &= ~(0x0Fu << (5u * 4u));
+    GPIOD->CFGLR |=  (0x0Bu << (5u * 4u));
+
+    /* 3. PD6 = RX: floating input
+     *    nibble value = CNF[1:0]=01, MODE[1:0]=00 → 0x4           */
+    GPIOD->CFGLR &= ~(0x0Fu << (6u * 4u));
+    GPIOD->CFGLR |=  (0x04u << (6u * 4u));
+
+    /* 4. Baud rate divisor
+     *    BRR = HCLK / baud  (integer rounding)                     */
+    USART1->BRR = (uint16_t)((24000000UL + baud / 2u) / baud);
+
+    /* 5. Enable USART, transmitter, and receiver (8N1 default)     */
+    USART1->CTLR1 = USART_Mode_Tx | USART_Mode_Rx | ((uint16_t)0x2000u);
 }
 
 void uart_print(const char *s)
 {
-    while (*s) _send_byte(*s++);
+    while (*s) {
+        _send(*s++);
+    }
 }
 
 void uart_println(const char *s)
 {
     uart_print(s);
-    _send_byte('\r');
-    _send_byte('\n');
+    _send('\r');
+    _send('\n');
 }
 
 void uart_print_num(uint32_t n)
 {
-    char buf[11];   /* max 10 digits for uint32 + null */
-    int  i = 0;
-    if (n == 0) { _send_byte('0'); return; }
-    while (n > 0) { buf[i++] = (char)('0' + n % 10); n /= 10; }
-    while (i > 0) _send_byte(buf[--i]);
-}
-
-void uart_print_int(int32_t n)
-{
-    if (n < 0) { _send_byte('-'); uart_print_num((uint32_t)(-n)); }
-    else        { uart_print_num((uint32_t)n); }
+    char buf[11];   /* max 10 decimal digits for uint32 + null */
+    uint8_t i = 0u;
+    if (n == 0u) { _send('0'); return; }
+    while (n > 0u) {
+        buf[i++] = (char)('0' + (n % 10u));
+        n /= 10u;
+    }
+    /* digits are stored in reverse; print from back to front */
+    while (i > 0u) {
+        _send(buf[--i]);
+    }
 }
 
 uint8_t uart_rx_available(void)
 {
-    /*
-     * RXNE (Receive data register Not Empty) is set by hardware
-     * when a complete byte has been received into USART1->DATAR.
-     * It is cleared automatically when DATAR is read.
-     */
-    return (USART1->STATR & USART_STATR_RXNE) ? 1 : 0;
+    return (USART1->STATR & USART_FLAG_RXNE) ? 1u : 0u;
 }
 
 char uart_read_byte(void)
 {
-    return (char)(USART1->DATAR & 0x1FF);
+    return (char)(USART1->DATAR & 0x1FFu);
 }

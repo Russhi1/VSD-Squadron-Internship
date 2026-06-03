@@ -1,50 +1,83 @@
 
+
 #ifndef EVENTQ_H
 #define EVENTQ_H
 
 #include <stdint.h>
 
-/* Maximum events buffered at once. Power of 2 keeps modulo fast. */
-#define EVENTQ_SIZE    16
+/* ── Queue capacity ─────────────────────────────────────────────────── */
+#define EVENTQ_SIZE   8u   /* Must be a power of 2; 8 events is plenty  */
 
-/* Maximum length of a UART command string stored in an event */
-#define EVENTQ_CMD_LEN 24
-
+/* ── Event types ────────────────────────────────────────────────────── */
 typedef enum {
-    EVENT_NONE = 0,
-    EVENT_TIMER_TICK,        /* fired every 1000 ms by the timer producer   */
-    EVENT_BUTTON_PRESSED,    /* fired on confirmed button press (debounced)  */
-    EVENT_UART_CMD,          /* fired when a '\n'-terminated command arrives */
+    EVT_NONE         = 0,
+    EVT_SHORT_PRESS  = 1,   /* Button released in < 500 ms              */
+    EVT_LONG_PRESS   = 2,   /* Button held for >= 500 ms then released  */
+    EVT_DOUBLE_TAP   = 3,   /* Two short presses within 400 ms          */
 } EventType;
 
-
+/* ── Event record ───────────────────────────────────────────────────── */
 typedef struct {
-    EventType type;
-    uint32_t  timestamp;
-    char      cmd[EVENTQ_CMD_LEN];
+    EventType type;       /* What happened                              */
+    uint32_t  timestamp;  /* timer_get_millis() at moment of push       */
 } Event;
 
+/* ── Queue object ───────────────────────────────────────────────────── */
 typedef struct {
     Event   buf[EVENTQ_SIZE];
-    uint8_t head;
-    uint8_t tail;
-    uint8_t count;
+    uint8_t head;    /* Next slot to read  (pop side)                   */
+    uint8_t tail;    /* Next slot to write (push side)                  */
+    uint8_t count;   /* Current number of events in buffer              */
 } EventQueue;
 
-void    eventq_init(EventQueue *q);
+/* ── Public API ─────────────────────────────────────────────────────── */
 
+/**
+ * @brief  Initialise the queue.  Call once before any push/pop.
+ * @param  q  Pointer to an EventQueue allocated by the caller.
+ */
+void eventq_init(EventQueue *q);
 
-uint8_t eventq_push(EventQueue *q,
-                    EventType   type,
-                    uint32_t    timestamp,
-                    const char *cmd);
+/**
+ * @brief  Push one event onto the tail of the queue.
+ * @param  q    The queue.
+ * @param  type Event type tag.
+ * @param  ts   Timestamp in ms (from timer_get_millis()).
+ * @return 1 on success, 0 if the queue was full (event dropped).
+ *
+ * Safe to call from an ISR — wraps the modification in a critical
+ * section using __disable_irq() / __enable_irq().
+ */
+uint8_t eventq_push(EventQueue *q, EventType type, uint32_t ts);
 
+/**
+ * @brief  Pop the oldest event from the head of the queue.
+ * @param  q    The queue.
+ * @param  out  Destination; filled only when return value is 1.
+ * @return 1 if an event was dequeued, 0 if the queue was empty.
+ *
+ * Called from main-loop context only; no critical section needed for
+ * the pop itself because head is only written here.
+ */
 uint8_t eventq_pop(EventQueue *q, Event *out);
 
-/* Returns 1 if the queue has no events, 0 otherwise. */
-uint8_t eventq_is_empty(const EventQueue *q);
-
-/* Returns current number of events waiting in queue. */
+/**
+ * @brief  Return the number of events currently in the queue.
+ */
 uint8_t eventq_depth(const EventQueue *q);
+
+/**
+ * @brief  Return 1 if the queue is empty, 0 otherwise.
+ */
+uint8_t eventq_empty(const EventQueue *q);
+
+/* ── Human-readable event name (for UART logging) ───────────────────── */
+
+/**
+ * @brief  Return a short constant string name for an event type.
+ * @param  t  EventType value.
+ * @return Pointer to a string literal; never NULL.
+ */
+const char *event_name(EventType t);
 
 #endif /* EVENTQ_H */
