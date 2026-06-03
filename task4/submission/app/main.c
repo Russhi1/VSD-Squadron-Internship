@@ -1,4 +1,5 @@
 
+
 #include "gpio.h"
 #include "timer.h"
 #include "uart.h"
@@ -22,6 +23,35 @@ static EventQueue g_queue;
 /* ── Statistics ─────────────────────────────────────────────────────── */
 static uint32_t g_total_events   = 0u;
 static uint32_t g_dropped_events = 0u;
+
+/* ─────────────────────────────────────────────────────────────────────
+ * BUTTON PRODUCER
+ *
+ * The EXTI ISR records the raw edge time and direction into two volatile
+ * variables.  The producer state machine (polled each main-loop iteration)
+ * reads them and classifies the press gesture.
+ *
+ * State machine:
+ *
+ *   IDLE
+ *     waiting for first falling edge (button pressed)
+ *     → on falling edge: record press_start, go to PRESSED
+ *
+ *   PRESSED
+ *     button is currently held down
+ *     → on rising edge (release): record release_time
+ *       • if hold >= LONG_PRESS_MS: push EVT_LONG_PRESS, go to IDLE
+ *       • else: go to WAIT_SECOND (counting from release_time)
+ *
+ *   WAIT_SECOND
+ *     waiting to see if a second tap arrives within DOUBLE_TAP_MS
+ *     → on falling edge (second press): push EVT_DOUBLE_TAP, go to CONSUME_SECOND
+ *     → on timeout (DOUBLE_TAP_MS expired): push EVT_SHORT_PRESS, go to IDLE
+ *
+ *   CONSUME_SECOND
+ *     absorb the second press release so we don't produce a third event
+ *     → on rising edge: go to IDLE
+ * ───────────────────────────────────────────────────────────────────── */
 
 typedef enum {
     BTN_IDLE,
@@ -131,12 +161,23 @@ static void button_producer(void)
     }
 }
 
-
+/* ─────────────────────────────────────────────────────────────────────
+ * LED UTILITY
+ * Blocking delay loop using timer_get_millis().
+ * ───────────────────────────────────────────────────────────────────── */
 static void delay_ms(uint32_t ms)
 {
     uint32_t start = timer_get_millis();
     while ((timer_get_millis() - start) < ms);
 }
+
+/* ─────────────────────────────────────────────────────────────────────
+ * EVENT HANDLERS
+ * Each handler is responsible for:
+ *   1. Driving the LED to produce the gesture-specific pattern.
+ *   2. Printing a UART log line.
+ * Handlers never touch the event queue or the button state.
+ * ───────────────────────────────────────────────────────────────────── */
 
 static void handler_short_press(const Event *e)
 {
@@ -176,8 +217,11 @@ static void handler_double_tap(const Event *e)
     }
 }
 
-
-
+/* ─────────────────────────────────────────────────────────────────────
+ * DISPATCHER
+ * Pops one event per call and routes it to the correct handler.
+ * Called once per main-loop iteration.
+ * ───────────────────────────────────────────────────────────────────── */
 static void dispatch_one(void)
 {
     Event e;
@@ -197,6 +241,10 @@ static void dispatch_one(void)
     }
 }
 
+/* ─────────────────────────────────────────────────────────────────────
+ * STATUS PRINTER
+ * Triggered when 's' is received over UART.
+ * ───────────────────────────────────────────────────────────────────── */
 static void print_status(void)
 {
     uart_print("[STATUS]   total_dispatched=");
@@ -210,6 +258,8 @@ static void print_status(void)
     uart_println("");
 }
 
+
+static void handle_uart_input(void)
 {
     while (uart_rx_available()) {
         char c = uart_read_byte();
@@ -228,6 +278,9 @@ static void print_status(void)
     }
 }
 
+/* ─────────────────────────────────────────────────────────────────────
+ * MAIN
+ * ───────────────────────────────────────────────────────────────────── */
 int main(void)
 {
     /* ── Hardware init ── */

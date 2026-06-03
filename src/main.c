@@ -1,3 +1,46 @@
+/*
+ * main.c — Smart Button Controller
+ *
+ * Hardware: VSDSquadron Mini (CH32V003F4U6)
+ * Drivers:  GPIO, Timer (SysTick), UART, EventQueue
+ *
+ * ─── Concept ──────────────────────────────────────────────────────────
+ * A single button (PD4, active-LOW, internal pull-up) produces three
+ * distinct event types depending on how it is pressed:
+ *
+ *   EVT_SHORT_PRESS   button held < 500 ms, no second press within 400 ms
+ *   EVT_LONG_PRESS    button held >= 500 ms then released
+ *   EVT_DOUBLE_TAP    two short presses, second press starts within 400 ms
+ *                     of the first release
+ *
+ * Each event type drives the LED (PC0) differently:
+ *   SHORT_PRESS  → single 200 ms blink
+ *   LONG_PRESS   → LED holds ON for 2 s then turns off
+ *   DOUBLE_TAP   → five rapid 80 ms blinks
+ *
+ * ─── Architecture ─────────────────────────────────────────────────────
+ *
+ *   [EXTI ISR]           [main loop]
+ *       │                    │
+ *       │  button_producer() │  dispatch_one()
+ *       │  (state machine)   │  (event router)
+ *       │        │           │        │
+ *       └──push──┤ EventQueue ├─pop───┘
+ *                │  (8 slots) │
+ *
+ * The EXTI ISR records raw edge timestamps.
+ * button_producer() (called from main loop every iteration) runs the
+ *   press-classification state machine and calls eventq_push().
+ * dispatch_one() pops one event and calls the correct handler.
+ * Handlers drive the LED and print a UART log line.
+ *
+ * main.c contains zero raw register accesses.
+ *
+ * ─── Button timing constants ──────────────────────────────────────────
+ *   LONG_PRESS_MS    500   hold time threshold for long press
+ *   DOUBLE_TAP_MS    400   max gap between first release and second press
+ *   DEBOUNCE_MS       20   ignore edges shorter than this
+ */
 
 #include "gpio.h"
 #include "timer.h"
@@ -22,6 +65,35 @@ static EventQueue g_queue;
 /* ── Statistics ─────────────────────────────────────────────────────── */
 static uint32_t g_total_events   = 0u;
 static uint32_t g_dropped_events = 0u;
+
+/* ─────────────────────────────────────────────────────────────────────
+ * BUTTON PRODUCER
+ *
+ * The EXTI ISR records the raw edge time and direction into two volatile
+ * variables.  The producer state machine (polled each main-loop iteration)
+ * reads them and classifies the press gesture.
+ *
+ * State machine:
+ *
+ *   IDLE
+ *     waiting for first falling edge (button pressed)
+ *     → on falling edge: record press_start, go to PRESSED
+ *
+ *   PRESSED
+ *     button is currently held down
+ *     → on rising edge (release): record release_time
+ *       • if hold >= LONG_PRESS_MS: push EVT_LONG_PRESS, go to IDLE
+ *       • else: go to WAIT_SECOND (counting from release_time)
+ *
+ *   WAIT_SECOND
+ *     waiting to see if a second tap arrives within DOUBLE_TAP_MS
+ *     → on falling edge (second press): push EVT_DOUBLE_TAP, go to CONSUME_SECOND
+ *     → on timeout (DOUBLE_TAP_MS expired): push EVT_SHORT_PRESS, go to IDLE
+ *
+ *   CONSUME_SECOND
+ *     absorb the second press release so we don't produce a third event
+ *     → on rising edge: go to IDLE
+ * ───────────────────────────────────────────────────────────────────── */
 
 typedef enum {
     BTN_IDLE,
@@ -131,12 +203,23 @@ static void button_producer(void)
     }
 }
 
-
+/* ─────────────────────────────────────────────────────────────────────
+ * LED UTILITY
+ * Blocking delay loop using timer_get_millis().
+ * ───────────────────────────────────────────────────────────────────── */
 static void delay_ms(uint32_t ms)
 {
     uint32_t start = timer_get_millis();
     while ((timer_get_millis() - start) < ms);
 }
+
+/* ─────────────────────────────────────────────────────────────────────
+ * EVENT HANDLERS
+ * Each handler is responsible for:
+ *   1. Driving the LED to produce the gesture-specific pattern.
+ *   2. Printing a UART log line.
+ * Handlers never touch the event queue or the button state.
+ * ───────────────────────────────────────────────────────────────────── */
 
 static void handler_short_press(const Event *e)
 {
@@ -176,8 +259,11 @@ static void handler_double_tap(const Event *e)
     }
 }
 
-
-
+/* ─────────────────────────────────────────────────────────────────────
+ * DISPATCHER
+ * Pops one event per call and routes it to the correct handler.
+ * Called once per main-loop iteration.
+ * ───────────────────────────────────────────────────────────────────── */
 static void dispatch_one(void)
 {
     Event e;
@@ -197,6 +283,10 @@ static void dispatch_one(void)
     }
 }
 
+/* ─────────────────────────────────────────────────────────────────────
+ * STATUS PRINTER
+ * Triggered when 's' is received over UART.
+ * ───────────────────────────────────────────────────────────────────── */
 static void print_status(void)
 {
     uart_print("[STATUS]   total_dispatched=");
@@ -210,6 +300,13 @@ static void print_status(void)
     uart_println("");
 }
 
+/* ─────────────────────────────────────────────────────────────────────
+ * UART COMMAND HANDLER
+ * Non-blocking; drains the RX byte by byte, acts on single-char cmds.
+ *   's'  print status
+ *   'h'  print help
+ * ───────────────────────────────────────────────────────────────────── */
+static void handle_uart_input(void)
 {
     while (uart_rx_available()) {
         char c = uart_read_byte();
@@ -228,6 +325,9 @@ static void print_status(void)
     }
 }
 
+/* ─────────────────────────────────────────────────────────────────────
+ * MAIN
+ * ───────────────────────────────────────────────────────────────────── */
 int main(void)
 {
     /* ── Hardware init ── */
