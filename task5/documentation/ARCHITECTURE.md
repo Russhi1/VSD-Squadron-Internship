@@ -4,7 +4,11 @@
 
 The project is structured as a two-layer firmware stack. The bottom layer contains hardware drivers. The top layer contains the application. The two layers communicate only through the driver API; the application never accesses hardware registers directly.
 
-!(<Br Gpio Flow-2026-06-04-123553.png>)
+
+<img width="2039" height="3350" alt="Br Gpio Flow-2026-06-04-123553" src="https://github.com/user-attachments/assets/f376c4bd-8391-4dc1-b2ee-d0c81a2f06e4" />
+
+
+
 
 ## Layer Descriptions
 
@@ -43,7 +47,8 @@ SysTick is configured directly in `main.c` rather than as a library module. This
 ---
 
 ## Data Flow
-!(<GPIOD INDR Register Edge-2026-06-04-123905.png>)
+<img width="2351" height="7049" alt="GPIOD INDR Register Edge-2026-06-04-123905" src="https://github.com/user-attachments/assets/498c761c-4afc-41ff-96b6-912c57d7b4ee" />
+
 
 ## Why This Architecture Was Chosen
 
