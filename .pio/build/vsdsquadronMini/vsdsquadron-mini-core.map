@@ -14,6 +14,10 @@ c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-em
                               .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_usart.o) (__divsi3)
 c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-init.o)
                               .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o (__libc_init_array)
+c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-memcpy.o)
+                              .pio\build\vsdsquadronMini\src\eventq.o (memcpy)
+c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-strncpy.o)
+                              .pio\build\vsdsquadronMini\src\eventq.o (strncpy)
 
 Discarded input sections
 
@@ -125,68 +129,27 @@ Discarded input sections
  .debug_str     0x0000000000000000      0x328 .pio\build\vsdsquadronMini\src\adc.o
  .comment       0x0000000000000000       0x34 .pio\build\vsdsquadronMini\src\adc.o
  .debug_frame   0x0000000000000000       0x3c .pio\build\vsdsquadronMini\src\adc.o
- .text          0x0000000000000000        0x0 .pio\build\vsdsquadronMini\src\buzzer.o
- .data          0x0000000000000000        0x0 .pio\build\vsdsquadronMini\src\buzzer.o
- .bss           0x0000000000000000        0x0 .pio\build\vsdsquadronMini\src\buzzer.o
- .text.buzzer_init
-                0x0000000000000000       0x2c .pio\build\vsdsquadronMini\src\buzzer.o
- .text.buzzer_start
-                0x0000000000000000       0x3e .pio\build\vsdsquadronMini\src\buzzer.o
- .text.buzzer_stop
-                0x0000000000000000       0x2e .pio\build\vsdsquadronMini\src\buzzer.o
- .text.buzzer_tick
-                0x0000000000000000       0x6a .pio\build\vsdsquadronMini\src\buzzer.o
- .text.buzzer_is_done
-                0x0000000000000000       0x14 .pio\build\vsdsquadronMini\src\buzzer.o
- .text.buzzer_is_active
-                0x0000000000000000        0xa .pio\build\vsdsquadronMini\src\buzzer.o
- .bss._active   0x0000000000000000        0x1 .pio\build\vsdsquadronMini\src\buzzer.o
- .bss._done     0x0000000000000000        0x1 .pio\build\vsdsquadronMini\src\buzzer.o
- .bss._end_time
-                0x0000000000000000        0x4 .pio\build\vsdsquadronMini\src\buzzer.o
- .bss._last_toggle
-                0x0000000000000000        0x4 .pio\build\vsdsquadronMini\src\buzzer.o
- .debug_info    0x0000000000000000      0x278 .pio\build\vsdsquadronMini\src\buzzer.o
- .debug_abbrev  0x0000000000000000      0x11c .pio\build\vsdsquadronMini\src\buzzer.o
- .debug_loc     0x0000000000000000       0x59 .pio\build\vsdsquadronMini\src\buzzer.o
- .debug_aranges
-                0x0000000000000000       0x48 .pio\build\vsdsquadronMini\src\buzzer.o
- .debug_ranges  0x0000000000000000       0x38 .pio\build\vsdsquadronMini\src\buzzer.o
- .debug_line    0x0000000000000000      0x366 .pio\build\vsdsquadronMini\src\buzzer.o
- .debug_str     0x0000000000000000      0x27f .pio\build\vsdsquadronMini\src\buzzer.o
- .comment       0x0000000000000000       0x34 .pio\build\vsdsquadronMini\src\buzzer.o
- .debug_frame   0x0000000000000000       0xa4 .pio\build\vsdsquadronMini\src\buzzer.o
  .text          0x0000000000000000        0x0 .pio\build\vsdsquadronMini\src\eventq.o
  .data          0x0000000000000000        0x0 .pio\build\vsdsquadronMini\src\eventq.o
  .bss           0x0000000000000000        0x0 .pio\build\vsdsquadronMini\src\eventq.o
- .text.eventq_empty
+ .text.eventq_is_empty
                 0x0000000000000000        0xa .pio\build\vsdsquadronMini\src\eventq.o
- .text.event_name
-                0x0000000000000000       0x24 .pio\build\vsdsquadronMini\src\eventq.o
- .rodata.CSWTCH.1
-                0x0000000000000000        0xc .pio\build\vsdsquadronMini\src\eventq.o
- .rodata.event_name.str1.4
-                0x0000000000000000        0xc .pio\build\vsdsquadronMini\src\eventq.o
- .rodata.str1.4
-                0x0000000000000000       0x24 .pio\build\vsdsquadronMini\src\eventq.o
  .text          0x0000000000000000        0x0 .pio\build\vsdsquadronMini\src\gpio.o
  .data          0x0000000000000000        0x0 .pio\build\vsdsquadronMini\src\gpio.o
  .bss           0x0000000000000000        0x0 .pio\build\vsdsquadronMini\src\gpio.o
+ .text.gpio_toggle
+                0x0000000000000000        0xe .pio\build\vsdsquadronMini\src\gpio.o
  .text          0x0000000000000000        0x0 .pio\build\vsdsquadronMini\src\main.o
  .data          0x0000000000000000        0x0 .pio\build\vsdsquadronMini\src\main.o
  .bss           0x0000000000000000        0x0 .pio\build\vsdsquadronMini\src\main.o
- .bss.g_edge_pending
-                0x0000000000000000        0x1 .pio\build\vsdsquadronMini\src\main.o
- .bss.g_edge_timestamp
-                0x0000000000000000        0x4 .pio\build\vsdsquadronMini\src\main.o
- .data.g_edge_level
-                0x0000000000000000        0x1 .pio\build\vsdsquadronMini\src\main.o
  .text          0x0000000000000000        0x0 .pio\build\vsdsquadronMini\src\timer.o
  .data          0x0000000000000000        0x0 .pio\build\vsdsquadronMini\src\timer.o
  .bss           0x0000000000000000        0x0 .pio\build\vsdsquadronMini\src\timer.o
  .text          0x0000000000000000        0x0 .pio\build\vsdsquadronMini\src\uart.o
  .data          0x0000000000000000        0x0 .pio\build\vsdsquadronMini\src\uart.o
  .bss           0x0000000000000000        0x0 .pio\build\vsdsquadronMini\src\uart.o
+ .text.uart_print_int
+                0x0000000000000000       0x2e .pio\build\vsdsquadronMini\src\uart.o
  .text          0x0000000000000000        0x0 .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_gpio.o)
  .data          0x0000000000000000        0x0 .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_gpio.o)
  .bss           0x0000000000000000        0x0 .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_gpio.o)
@@ -369,6 +332,12 @@ Discarded input sections
  .text          0x0000000000000000        0x0 c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-init.o)
  .data          0x0000000000000000        0x0 c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-init.o)
  .bss           0x0000000000000000        0x0 c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-init.o)
+ .text          0x0000000000000000        0x0 c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-memcpy.o)
+ .data          0x0000000000000000        0x0 c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-memcpy.o)
+ .bss           0x0000000000000000        0x0 c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-memcpy.o)
+ .text          0x0000000000000000        0x0 c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-strncpy.o)
+ .data          0x0000000000000000        0x0 c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-strncpy.o)
+ .bss           0x0000000000000000        0x0 c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-strncpy.o)
 
 Memory Configuration
 
@@ -385,7 +354,6 @@ LOAD .pio\build\vsdsquadronMini\FrameworkNoneOSSSystem\system_ch32v00x.o
 LOAD .pio\build\vsdsquadronMini\FrameworkNoneOSDebug\debug.o
 LOAD .pio\build\vsdsquadronMini\FrameworkInitFini\cpp_support.o
 LOAD .pio\build\vsdsquadronMini\src\adc.o
-LOAD .pio\build\vsdsquadronMini\src\buzzer.o
 LOAD .pio\build\vsdsquadronMini\src\eventq.o
 LOAD .pio\build\vsdsquadronMini\src\gpio.o
 LOAD .pio\build\vsdsquadronMini\src\main.o
@@ -456,7 +424,7 @@ END GROUP
                 0x0000000020000000                . = ALIGN (0x4)
                 0x0000000020000000                PROVIDE (_highcode_vma_end = .)
 
-.text           0x00000000000000c0      0xaf8
+.text           0x00000000000000c0      0xd14
                 0x00000000000000c0                . = ALIGN (0x4)
  *(.text)
  .text          0x00000000000000c0       0x14 c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/rv32ecxw/ilp32e\libgcc.a(save-restore.o)
@@ -504,126 +472,128 @@ END GROUP
                 0x0000000000000154       0xb4 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
                 0x0000000000000154                handle_reset
  .text.SystemInit
-                0x0000000000000208       0x74 .pio\build\vsdsquadronMini\FrameworkNoneOSSSystem\system_ch32v00x.o
+                0x0000000000000208       0x76 .pio\build\vsdsquadronMini\FrameworkNoneOSSSystem\system_ch32v00x.o
                 0x0000000000000208                SystemInit
- .text._fini    0x000000000000027c        0x2 .pio\build\vsdsquadronMini\FrameworkInitFini\cpp_support.o
-                0x000000000000027c                _fini
- .text._init    0x000000000000027e        0x2 .pio\build\vsdsquadronMini\FrameworkInitFini\cpp_support.o
-                0x000000000000027e                _init
+ .text._fini    0x000000000000027e        0x2 .pio\build\vsdsquadronMini\FrameworkInitFini\cpp_support.o
+                0x000000000000027e                _fini
+ .text._init    0x0000000000000280        0x2 .pio\build\vsdsquadronMini\FrameworkInitFini\cpp_support.o
+                0x0000000000000280                _init
  .text.eventq_init
-                0x0000000000000280        0xa .pio\build\vsdsquadronMini\src\eventq.o
-                0x0000000000000280                eventq_init
+                0x0000000000000282        0xa .pio\build\vsdsquadronMini\src\eventq.o
+                0x0000000000000282                eventq_init
  .text.eventq_push
-                0x000000000000028a       0x42 .pio\build\vsdsquadronMini\src\eventq.o
-                0x000000000000028a                eventq_push
+                0x000000000000028c       0x5e .pio\build\vsdsquadronMini\src\eventq.o
+                0x000000000000028c                eventq_push
  .text.eventq_pop
-                0x00000000000002cc       0x42 .pio\build\vsdsquadronMini\src\eventq.o
-                0x00000000000002cc                eventq_pop
+                0x00000000000002ea       0xa2 .pio\build\vsdsquadronMini\src\eventq.o
+                0x00000000000002ea                eventq_pop
  .text.eventq_depth
-                0x000000000000030e        0x6 .pio\build\vsdsquadronMini\src\eventq.o
-                0x000000000000030e                eventq_depth
+                0x000000000000038c        0x6 .pio\build\vsdsquadronMini\src\eventq.o
+                0x000000000000038c                eventq_depth
  .text.gpio_init
-                0x0000000000000314       0x8e .pio\build\vsdsquadronMini\src\gpio.o
-                0x0000000000000314                gpio_init
+                0x0000000000000392       0xba .pio\build\vsdsquadronMini\src\gpio.o
+                0x0000000000000392                gpio_init
  .text.gpio_write
-                0x00000000000003a2       0x2e .pio\build\vsdsquadronMini\src\gpio.o
-                0x00000000000003a2                gpio_write
+                0x000000000000044c       0x1c .pio\build\vsdsquadronMini\src\gpio.o
+                0x000000000000044c                gpio_write
  .text.gpio_read
-                0x00000000000003d0       0x26 .pio\build\vsdsquadronMini\src\gpio.o
-                0x00000000000003d0                gpio_read
- .text.delay_ms
-                0x00000000000003f6       0x14 .pio\build\vsdsquadronMini\src\main.o
+                0x0000000000000468        0xa .pio\build\vsdsquadronMini\src\gpio.o
+                0x0000000000000468                gpio_read
+ .text.str_eq   0x0000000000000472       0x20 .pio\build\vsdsquadronMini\src\main.o
  .text.startup.main
-                0x000000000000040a      0x2d2 .pio\build\vsdsquadronMini\src\main.o
-                0x000000000000040a                main
+                0x0000000000000492      0x3bc .pio\build\vsdsquadronMini\src\main.o
+                0x0000000000000492                main
  .text.SysTick_Handler
-                0x00000000000006dc       0x16 .pio\build\vsdsquadronMini\src\timer.o
-                0x00000000000006dc                SysTick_Handler
+                0x000000000000084e       0x16 .pio\build\vsdsquadronMini\src\timer.o
+                0x000000000000084e                SysTick_Handler
  .text.timer_init
-                0x00000000000006f2       0x30 .pio\build\vsdsquadronMini\src\timer.o
-                0x00000000000006f2                timer_init
+                0x0000000000000864       0x30 .pio\build\vsdsquadronMini\src\timer.o
+                0x0000000000000864                timer_init
  .text.timer_get_millis
-                0x0000000000000722        0x6 .pio\build\vsdsquadronMini\src\timer.o
-                0x0000000000000722                timer_get_millis
- .text._send    0x0000000000000728       0x18 .pio\build\vsdsquadronMini\src\uart.o
+                0x0000000000000894        0x6 .pio\build\vsdsquadronMini\src\timer.o
+                0x0000000000000894                timer_get_millis
+ .text._send_byte
+                0x000000000000089a       0x18 .pio\build\vsdsquadronMini\src\uart.o
  .text.uart_init
-                0x0000000000000740       0x7e .pio\build\vsdsquadronMini\src\uart.o
-                0x0000000000000740                uart_init
+                0x00000000000008b2       0x7e .pio\build\vsdsquadronMini\src\uart.o
+                0x00000000000008b2                uart_init
  .text.uart_print
-                0x00000000000007be       0x16 .pio\build\vsdsquadronMini\src\uart.o
-                0x00000000000007be                uart_print
+                0x0000000000000930       0x16 .pio\build\vsdsquadronMini\src\uart.o
+                0x0000000000000930                uart_print
  .text.uart_println
-                0x00000000000007d4       0x12 .pio\build\vsdsquadronMini\src\uart.o
-                0x00000000000007d4                uart_println
+                0x0000000000000946       0x12 .pio\build\vsdsquadronMini\src\uart.o
+                0x0000000000000946                uart_println
  .text.uart_print_num
-                0x00000000000007e6       0x60 .pio\build\vsdsquadronMini\src\uart.o
-                0x00000000000007e6                uart_print_num
+                0x0000000000000958       0x54 .pio\build\vsdsquadronMini\src\uart.o
+                0x0000000000000958                uart_print_num
  .text.uart_rx_available
-                0x0000000000000846        0xe .pio\build\vsdsquadronMini\src\uart.o
-                0x0000000000000846                uart_rx_available
+                0x00000000000009ac        0xe .pio\build\vsdsquadronMini\src\uart.o
+                0x00000000000009ac                uart_rx_available
  .text.uart_read_byte
-                0x0000000000000854        0xe .pio\build\vsdsquadronMini\src\uart.o
-                0x0000000000000854                uart_read_byte
+                0x00000000000009ba        0xe .pio\build\vsdsquadronMini\src\uart.o
+                0x00000000000009ba                uart_read_byte
  .text.RCC_AdjustHSICalibrationValue
-                0x0000000000000862       0x12 .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
-                0x0000000000000862                RCC_AdjustHSICalibrationValue
+                0x00000000000009c8       0x12 .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
+                0x00000000000009c8                RCC_AdjustHSICalibrationValue
  .text.__libc_init_array
-                0x0000000000000874       0x74 c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-init.o)
-                0x0000000000000874                __libc_init_array
+                0x00000000000009da       0x76 c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-init.o)
+                0x00000000000009da                __libc_init_array
+ .text.memcpy   0x0000000000000a50       0xd2 c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-memcpy.o)
+                0x0000000000000a50                memcpy
+ .text.strncpy  0x0000000000000b22       0x24 c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-strncpy.o)
+                0x0000000000000b22                strncpy
  *(.rodata)
  *(.rodata*)
- *fill*         0x00000000000008e8        0x0 
- .rodata.CSWTCH.0
-                0x00000000000008e8        0xc .pio\build\vsdsquadronMini\src\gpio.o
+ *fill*         0x0000000000000b46        0x2 
  .rodata.main.str1.4
-                0x00000000000008f4      0x2c4 .pio\build\vsdsquadronMini\src\main.o
-                                        0x2c7 (size before relaxing)
+                0x0000000000000b48      0x28c .pio\build\vsdsquadronMini\src\main.o
+                                        0x28e (size before relaxing)
  *(.gnu.linkonce.t.*)
-                0x0000000000000bb8                . = ALIGN (0x4)
-                0x0000000000000bb8                __fsymtab_start = .
+                0x0000000000000dd4                . = ALIGN (0x4)
+                0x0000000000000dd4                __fsymtab_start = .
  *(FSymTab)
-                0x0000000000000bb8                __fsymtab_end = .
-                0x0000000000000bb8                . = ALIGN (0x4)
-                0x0000000000000bb8                __vsymtab_start = .
+                0x0000000000000dd4                __fsymtab_end = .
+                0x0000000000000dd4                . = ALIGN (0x4)
+                0x0000000000000dd4                __vsymtab_start = .
  *(VSymTab)
-                0x0000000000000bb8                __vsymtab_end = .
-                0x0000000000000bb8                . = ALIGN (0x4)
-                0x0000000000000bb8                . = ALIGN (0x4)
-                0x0000000000000bb8                __rt_init_start = .
+                0x0000000000000dd4                __vsymtab_end = .
+                0x0000000000000dd4                . = ALIGN (0x4)
+                0x0000000000000dd4                . = ALIGN (0x4)
+                0x0000000000000dd4                __rt_init_start = .
  *(SORT_BY_NAME(.rti_fn*))
-                0x0000000000000bb8                __rt_init_end = .
-                0x0000000000000bb8                . = ALIGN (0x4)
-                0x0000000000000bb8                . = ALIGN (0x4)
-                0x0000000000000bb8                __rtmsymtab_start = .
+                0x0000000000000dd4                __rt_init_end = .
+                0x0000000000000dd4                . = ALIGN (0x4)
+                0x0000000000000dd4                . = ALIGN (0x4)
+                0x0000000000000dd4                __rtmsymtab_start = .
  *(RTMSymTab)
-                0x0000000000000bb8                __rtmsymtab_end = .
-                0x0000000000000bb8                . = ALIGN (0x4)
+                0x0000000000000dd4                __rtmsymtab_end = .
+                0x0000000000000dd4                . = ALIGN (0x4)
 
-.rela.dyn       0x0000000000000bb8        0x0
- .rela.init     0x0000000000000bb8        0x0 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
+.rela.dyn       0x0000000000000dd4        0x0
+ .rela.init     0x0000000000000dd4        0x0 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
  .rela.text.handle_reset
-                0x0000000000000bb8        0x0 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
+                0x0000000000000dd4        0x0 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
  .rela.text.__libc_init_array
-                0x0000000000000bb8        0x0 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
+                0x0000000000000dd4        0x0 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
 
-.fini           0x0000000000000bb8        0x0
+.fini           0x0000000000000dd4        0x0
  *(SORT_NONE(.fini))
-                0x0000000000000bb8                . = ALIGN (0x4)
+                0x0000000000000dd4                . = ALIGN (0x4)
                 [!provide]                        PROVIDE (_etext = .)
                 [!provide]                        PROVIDE (_eitcm = .)
 
-.preinit_array  0x0000000000000bb8        0x0
-                0x0000000000000bb8                PROVIDE (__preinit_array_start = .)
+.preinit_array  0x0000000000000dd4        0x0
+                0x0000000000000dd4                PROVIDE (__preinit_array_start = .)
  *(.preinit_array)
-                0x0000000000000bb8                PROVIDE (__preinit_array_end = .)
+                0x0000000000000dd4                PROVIDE (__preinit_array_end = .)
 
-.init_array     0x0000000000000bb8        0x0
-                0x0000000000000bb8                PROVIDE (__init_array_start = .)
+.init_array     0x0000000000000dd4        0x0
+                0x0000000000000dd4                PROVIDE (__init_array_start = .)
  *(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*))
  *(.init_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .ctors)
-                0x0000000000000bb8                PROVIDE (__init_array_end = .)
+                0x0000000000000dd4                PROVIDE (__init_array_end = .)
 
-.fini_array     0x0000000000000bb8        0x0
+.fini_array     0x0000000000000dd4        0x0
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_INIT_PRIORITY(.fini_array.*) SORT_BY_INIT_PRIORITY(.dtors.*))
  *(.fini_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .dtors)
@@ -643,20 +613,20 @@ END GROUP
  *(SORT_BY_NAME(.dtors.*))
  *(.dtors)
 
-.dalign         0x0000000020000000        0x0 load address 0x0000000000000bb8
+.dalign         0x0000000020000000        0x0 load address 0x0000000000000dd4
                 0x0000000020000000                . = ALIGN (0x4)
                 0x0000000020000000                PROVIDE (_data_vma = .)
 
-.dlalign        0x0000000000000bb8        0x0
-                0x0000000000000bb8                . = ALIGN (0x4)
-                0x0000000000000bb8                PROVIDE (_data_lma = .)
+.dlalign        0x0000000000000dd4        0x0
+                0x0000000000000dd4                . = ALIGN (0x4)
+                0x0000000000000dd4                PROVIDE (_data_lma = .)
 
-.data           0x0000000020000000        0x8 load address 0x0000000000000bb8
+.data           0x0000000020000000        0x8 load address 0x0000000000000dd4
  *(.gnu.linkonce.r.*)
  *(.data .data.*)
- .data.confirmed.1640
+ .data.confirmed_state.3103
                 0x0000000020000000        0x1 .pio\build\vsdsquadronMini\src\main.o
- .data.last_raw.1638
+ .data.raw_prev.3104
                 0x0000000020000001        0x1 .pio\build\vsdsquadronMini\src\main.o
  *(.gnu.linkonce.d.*)
                 0x0000000020000008                . = ALIGN (0x8)
@@ -674,32 +644,39 @@ END GROUP
                 0x0000000020000008                . = ALIGN (0x4)
                 0x0000000020000008                PROVIDE (_edata = .)
 
-.bss            0x0000000020000008       0x60 load address 0x0000000000000bc0
+.bss            0x0000000020000008      0x2bc load address 0x0000000000000ddc
                 0x0000000020000008                . = ALIGN (0x4)
                 0x0000000020000008                PROVIDE (_sbss = .)
  *(.sbss*)
  *(.gnu.linkonce.sb.*)
  *(.bss*)
- .bss.g_dropped_events
+ .bss.bounce_start.3105
                 0x0000000020000008        0x4 .pio\build\vsdsquadronMini\src\main.o
- .bss.g_queue   0x000000002000000c       0x44 .pio\build\vsdsquadronMini\src\main.o
- .bss.g_total_events
-                0x0000000020000050        0x4 .pio\build\vsdsquadronMini\src\main.o
- .bss.press_start.1636
-                0x0000000020000054        0x4 .pio\build\vsdsquadronMini\src\main.o
- .bss.release_t.1637
-                0x0000000020000058        0x4 .pio\build\vsdsquadronMini\src\main.o
- .bss.stable_t.1639
-                0x000000002000005c        0x4 .pio\build\vsdsquadronMini\src\main.o
- .bss.state.1635
-                0x0000000020000060        0x4 .pio\build\vsdsquadronMini\src\main.o
- .bss._millis   0x0000000020000064        0x4 .pio\build\vsdsquadronMini\src\timer.o
-                0x0000000020000064                _millis
+ .bss.cmd_buf.3111
+                0x000000002000000c       0x18 .pio\build\vsdsquadronMini\src\main.o
+ .bss.cmd_idx.3112
+                0x0000000020000024        0x1 .pio\build\vsdsquadronMini\src\main.o
+ *fill*         0x0000000020000025        0x3 
+ .bss.g_events_dropped
+                0x0000000020000028        0x4 .pio\build\vsdsquadronMini\src\main.o
+ .bss.g_events_total
+                0x000000002000002c        0x4 .pio\build\vsdsquadronMini\src\main.o
+ .bss.g_led_state
+                0x0000000020000030        0x1 .pio\build\vsdsquadronMini\src\main.o
+ *fill*         0x0000000020000031        0x3 
+ .bss.g_queue   0x0000000020000034      0x284 .pio\build\vsdsquadronMini\src\main.o
+ .bss.g_uptime_sec
+                0x00000000200002b8        0x4 .pio\build\vsdsquadronMini\src\main.o
+ .bss.last_tick.3098
+                0x00000000200002bc        0x4 .pio\build\vsdsquadronMini\src\main.o
+ .bss._millis_count
+                0x00000000200002c0        0x4 .pio\build\vsdsquadronMini\src\timer.o
+                0x00000000200002c0                _millis_count
  *(.gnu.linkonce.b.*)
  *(COMMON*)
-                0x0000000020000068                . = ALIGN (0x4)
-                0x0000000020000068                PROVIDE (_ebss = .)
-                0x0000000020000068                PROVIDE (_end = _ebss)
+                0x00000000200002c4                . = ALIGN (0x4)
+                0x00000000200002c4                PROVIDE (_ebss = .)
+                0x00000000200002c4                PROVIDE (_end = _ebss)
                 [!provide]                        PROVIDE (end = .)
 
 .stack          0x0000000020000700      0x100
@@ -712,40 +689,40 @@ END GROUP
                 0x0000000020000800                __freertos_irq_stack_top = .
 OUTPUT(.pio\build\vsdsquadronMini\firmware.elf elf32-littleriscv)
 
-.debug_line     0x0000000000000000     0x29fb
+.debug_line     0x0000000000000000     0x2e51
  .debug_line    0x0000000000000000      0x188 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
  .debug_line    0x0000000000000188      0x3b3 .pio\build\vsdsquadronMini\FrameworkNoneOSSSystem\system_ch32v00x.o
  .debug_line    0x000000000000053b       0x98 .pio\build\vsdsquadronMini\FrameworkInitFini\cpp_support.o
- .debug_line    0x00000000000005d3      0x42b .pio\build\vsdsquadronMini\src\eventq.o
- .debug_line    0x00000000000009fe      0x383 .pio\build\vsdsquadronMini\src\gpio.o
- .debug_line    0x0000000000000d81      0x691 .pio\build\vsdsquadronMini\src\main.o
- .debug_line    0x0000000000001412      0x32c .pio\build\vsdsquadronMini\src\timer.o
- .debug_line    0x000000000000173e      0x4e0 .pio\build\vsdsquadronMini\src\uart.o
- .debug_line    0x0000000000001c1e      0xddd .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
+ .debug_line    0x00000000000005d3      0x556 .pio\build\vsdsquadronMini\src\eventq.o
+ .debug_line    0x0000000000000b29      0x453 .pio\build\vsdsquadronMini\src\gpio.o
+ .debug_line    0x0000000000000f7c      0x8b2 .pio\build\vsdsquadronMini\src\main.o
+ .debug_line    0x000000000000182e      0x32c .pio\build\vsdsquadronMini\src\timer.o
+ .debug_line    0x0000000000001b5a      0x51a .pio\build\vsdsquadronMini\src\uart.o
+ .debug_line    0x0000000000002074      0xddd .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
 
-.debug_info     0x0000000000000000     0x233b
+.debug_info     0x0000000000000000     0x2ed0
  .debug_info    0x0000000000000000       0x22 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
  .debug_info    0x0000000000000022      0x27c .pio\build\vsdsquadronMini\FrameworkNoneOSSSystem\system_ch32v00x.o
  .debug_info    0x000000000000029e       0x46 .pio\build\vsdsquadronMini\FrameworkInitFini\cpp_support.o
- .debug_info    0x00000000000002e4      0x2f9 .pio\build\vsdsquadronMini\src\eventq.o
- .debug_info    0x00000000000005dd      0x30d .pio\build\vsdsquadronMini\src\gpio.o
- .debug_info    0x00000000000008ea      0x9a4 .pio\build\vsdsquadronMini\src\main.o
- .debug_info    0x000000000000128e      0x495 .pio\build\vsdsquadronMini\src\timer.o
- .debug_info    0x0000000000001723      0x43a .pio\build\vsdsquadronMini\src\uart.o
- .debug_info    0x0000000000001b5d      0x7de .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
+ .debug_info    0x00000000000002e4      0xc7d .pio\build\vsdsquadronMini\src\eventq.o
+ .debug_info    0x0000000000000f61      0x2ee .pio\build\vsdsquadronMini\src\gpio.o
+ .debug_info    0x000000000000124f      0xb42 .pio\build\vsdsquadronMini\src\main.o
+ .debug_info    0x0000000000001d91      0x495 .pio\build\vsdsquadronMini\src\timer.o
+ .debug_info    0x0000000000002226      0x4cc .pio\build\vsdsquadronMini\src\uart.o
+ .debug_info    0x00000000000026f2      0x7de .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
 
-.debug_abbrev   0x0000000000000000      0xc94
+.debug_abbrev   0x0000000000000000      0xe06
  .debug_abbrev  0x0000000000000000       0x12 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
  .debug_abbrev  0x0000000000000012      0x165 .pio\build\vsdsquadronMini\FrameworkNoneOSSSystem\system_ch32v00x.o
  .debug_abbrev  0x0000000000000177       0x44 .pio\build\vsdsquadronMini\FrameworkInitFini\cpp_support.o
- .debug_abbrev  0x00000000000001bb      0x159 .pio\build\vsdsquadronMini\src\eventq.o
- .debug_abbrev  0x0000000000000314      0x16b .pio\build\vsdsquadronMini\src\gpio.o
- .debug_abbrev  0x000000000000047f      0x236 .pio\build\vsdsquadronMini\src\main.o
- .debug_abbrev  0x00000000000006b5      0x1a7 .pio\build\vsdsquadronMini\src\timer.o
- .debug_abbrev  0x000000000000085c      0x1d6 .pio\build\vsdsquadronMini\src\uart.o
- .debug_abbrev  0x0000000000000a32      0x262 .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
+ .debug_abbrev  0x00000000000001bb      0x2a2 .pio\build\vsdsquadronMini\src\eventq.o
+ .debug_abbrev  0x000000000000045d      0x156 .pio\build\vsdsquadronMini\src\gpio.o
+ .debug_abbrev  0x00000000000005b3      0x22a .pio\build\vsdsquadronMini\src\main.o
+ .debug_abbrev  0x00000000000007dd      0x1a7 .pio\build\vsdsquadronMini\src\timer.o
+ .debug_abbrev  0x0000000000000984      0x220 .pio\build\vsdsquadronMini\src\uart.o
+ .debug_abbrev  0x0000000000000ba4      0x262 .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
 
-.debug_aranges  0x0000000000000000      0x278
+.debug_aranges  0x0000000000000000      0x280
  .debug_aranges
                 0x0000000000000000       0x30 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
  .debug_aranges
@@ -753,56 +730,56 @@ OUTPUT(.pio\build\vsdsquadronMini\firmware.elf elf32-littleriscv)
  .debug_aranges
                 0x0000000000000058       0x20 .pio\build\vsdsquadronMini\FrameworkInitFini\cpp_support.o
  .debug_aranges
-                0x0000000000000078       0x48 .pio\build\vsdsquadronMini\src\eventq.o
+                0x0000000000000078       0x40 .pio\build\vsdsquadronMini\src\eventq.o
  .debug_aranges
-                0x00000000000000c0       0x30 .pio\build\vsdsquadronMini\src\gpio.o
+                0x00000000000000b8       0x38 .pio\build\vsdsquadronMini\src\gpio.o
  .debug_aranges
                 0x00000000000000f0       0x28 .pio\build\vsdsquadronMini\src\main.o
  .debug_aranges
                 0x0000000000000118       0x30 .pio\build\vsdsquadronMini\src\timer.o
  .debug_aranges
-                0x0000000000000148       0x50 .pio\build\vsdsquadronMini\src\uart.o
+                0x0000000000000148       0x58 .pio\build\vsdsquadronMini\src\uart.o
  .debug_aranges
-                0x0000000000000198       0xe0 .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
+                0x00000000000001a0       0xe0 .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
 
-.debug_str      0x0000000000000000      0xcc5
+.debug_str      0x0000000000000000     0x10b9
  .debug_str     0x0000000000000000       0xc2 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
  .debug_str     0x00000000000000c2      0x261 .pio\build\vsdsquadronMini\FrameworkNoneOSSSystem\system_ch32v00x.o
                                         0x317 (size before relaxing)
  .debug_str     0x0000000000000323       0x5d .pio\build\vsdsquadronMini\FrameworkInitFini\cpp_support.o
                                         0x177 (size before relaxing)
- .debug_str     0x0000000000000380       0xd7 .pio\build\vsdsquadronMini\src\eventq.o
-                                        0x2b4 (size before relaxing)
- .debug_str     0x0000000000000457       0x66 .pio\build\vsdsquadronMini\src\gpio.o
-                                        0x2bb (size before relaxing)
- .debug_str     0x00000000000004bd      0x1d0 .pio\build\vsdsquadronMini\src\main.o
-                                        0x459 (size before relaxing)
- .debug_str     0x000000000000068d      0x25b .pio\build\vsdsquadronMini\src\timer.o
-                                        0x46e (size before relaxing)
- .debug_str     0x00000000000008e8       0x4d .pio\build\vsdsquadronMini\src\uart.o
-                                        0x33e (size before relaxing)
- .debug_str     0x0000000000000935      0x390 .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
+ .debug_str     0x0000000000000380      0x4ec .pio\build\vsdsquadronMini\src\eventq.o
+                                        0x6f2 (size before relaxing)
+ .debug_str     0x000000000000086c       0x59 .pio\build\vsdsquadronMini\src\gpio.o
+                                        0x2ae (size before relaxing)
+ .debug_str     0x00000000000008c5      0x183 .pio\build\vsdsquadronMini\src\main.o
+                                        0x4a0 (size before relaxing)
+ .debug_str     0x0000000000000a48      0x276 .pio\build\vsdsquadronMini\src\timer.o
+                                        0x474 (size before relaxing)
+ .debug_str     0x0000000000000cbe       0x6b .pio\build\vsdsquadronMini\src\uart.o
+                                        0x364 (size before relaxing)
+ .debug_str     0x0000000000000d29      0x390 .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
                                         0x62e (size before relaxing)
 
-.debug_ranges   0x0000000000000000      0x298
+.debug_ranges   0x0000000000000000      0x278
  .debug_ranges  0x0000000000000000       0x28 .pio\build\vsdsquadronMini\FrameworkNoneOSStartup\startup_ch32v00x.o
  .debug_ranges  0x0000000000000028       0x18 .pio\build\vsdsquadronMini\FrameworkNoneOSSSystem\system_ch32v00x.o
  .debug_ranges  0x0000000000000040       0x10 .pio\build\vsdsquadronMini\FrameworkInitFini\cpp_support.o
- .debug_ranges  0x0000000000000050       0x50 .pio\build\vsdsquadronMini\src\eventq.o
- .debug_ranges  0x00000000000000a0       0x38 .pio\build\vsdsquadronMini\src\gpio.o
- .debug_ranges  0x00000000000000d8       0x90 .pio\build\vsdsquadronMini\src\main.o
- .debug_ranges  0x0000000000000168       0x20 .pio\build\vsdsquadronMini\src\timer.o
- .debug_ranges  0x0000000000000188       0x40 .pio\build\vsdsquadronMini\src\uart.o
- .debug_ranges  0x00000000000001c8       0xd0 .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
+ .debug_ranges  0x0000000000000050       0x30 .pio\build\vsdsquadronMini\src\eventq.o
+ .debug_ranges  0x0000000000000080       0x48 .pio\build\vsdsquadronMini\src\gpio.o
+ .debug_ranges  0x00000000000000c8       0x78 .pio\build\vsdsquadronMini\src\main.o
+ .debug_ranges  0x0000000000000140       0x20 .pio\build\vsdsquadronMini\src\timer.o
+ .debug_ranges  0x0000000000000160       0x48 .pio\build\vsdsquadronMini\src\uart.o
+ .debug_ranges  0x00000000000001a8       0xd0 .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
 
-.debug_loc      0x0000000000000000      0xadb
+.debug_loc      0x0000000000000000      0xbbb
  .debug_loc     0x0000000000000000       0x55 .pio\build\vsdsquadronMini\FrameworkNoneOSSSystem\system_ch32v00x.o
- .debug_loc     0x0000000000000055       0xc8 .pio\build\vsdsquadronMini\src\eventq.o
- .debug_loc     0x000000000000011d      0x17c .pio\build\vsdsquadronMini\src\gpio.o
- .debug_loc     0x0000000000000299      0x147 .pio\build\vsdsquadronMini\src\main.o
- .debug_loc     0x00000000000003e0       0x14 .pio\build\vsdsquadronMini\src\timer.o
- .debug_loc     0x00000000000003f4      0x104 .pio\build\vsdsquadronMini\src\uart.o
- .debug_loc     0x00000000000004f8      0x5e3 .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
+ .debug_loc     0x0000000000000055      0x297 .pio\build\vsdsquadronMini\src\eventq.o
+ .debug_loc     0x00000000000002ec       0xbd .pio\build\vsdsquadronMini\src\gpio.o
+ .debug_loc     0x00000000000003a9      0x100 .pio\build\vsdsquadronMini\src\main.o
+ .debug_loc     0x00000000000004a9       0x14 .pio\build\vsdsquadronMini\src\timer.o
+ .debug_loc     0x00000000000004bd      0x11b .pio\build\vsdsquadronMini\src\uart.o
+ .debug_loc     0x00000000000005d8      0x5e3 .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
 
 .comment        0x0000000000000000       0x33
  .comment       0x0000000000000000       0x33 .pio\build\vsdsquadronMini\FrameworkNoneOSSSystem\system_ch32v00x.o
@@ -815,13 +792,15 @@ OUTPUT(.pio\build\vsdsquadronMini\firmware.elf elf32-littleriscv)
  .comment       0x0000000000000033       0x34 .pio\build\vsdsquadronMini\src\uart.o
  .comment       0x0000000000000033       0x34 .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
 
-.debug_frame    0x0000000000000000      0x490
+.debug_frame    0x0000000000000000      0x524
  .debug_frame   0x0000000000000000       0x50 .pio\build\vsdsquadronMini\FrameworkNoneOSSSystem\system_ch32v00x.o
  .debug_frame   0x0000000000000050       0x30 .pio\build\vsdsquadronMini\FrameworkInitFini\cpp_support.o
- .debug_frame   0x0000000000000080       0x70 .pio\build\vsdsquadronMini\src\eventq.o
- .debug_frame   0x00000000000000f0       0x40 .pio\build\vsdsquadronMini\src\gpio.o
- .debug_frame   0x0000000000000130       0x4c .pio\build\vsdsquadronMini\src\main.o
- .debug_frame   0x000000000000017c       0x40 .pio\build\vsdsquadronMini\src\timer.o
- .debug_frame   0x00000000000001bc       0xc0 .pio\build\vsdsquadronMini\src\uart.o
- .debug_frame   0x000000000000027c      0x1dc .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
- .debug_frame   0x0000000000000458       0x38 c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-init.o)
+ .debug_frame   0x0000000000000080       0x90 .pio\build\vsdsquadronMini\src\eventq.o
+ .debug_frame   0x0000000000000110       0x50 .pio\build\vsdsquadronMini\src\gpio.o
+ .debug_frame   0x0000000000000160       0x3c .pio\build\vsdsquadronMini\src\main.o
+ .debug_frame   0x000000000000019c       0x40 .pio\build\vsdsquadronMini\src\timer.o
+ .debug_frame   0x00000000000001dc       0xdc .pio\build\vsdsquadronMini\src\uart.o
+ .debug_frame   0x00000000000002b8      0x1dc .pio\build\vsdsquadronMini\libFrameworkNoneOSVariant.a(ch32v00x_rcc.o)
+ .debug_frame   0x0000000000000494       0x38 c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-init.o)
+ .debug_frame   0x00000000000004cc       0x38 c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-memcpy.o)
+ .debug_frame   0x0000000000000504       0x20 c:/users/rushi/.platformio/packages/toolchain-riscv/bin/../lib/gcc/riscv-none-embed/8.2.0/../../../../riscv-none-embed/lib/rv32ecxw/ilp32e\libc_nano.a(lib_a-strncpy.o)

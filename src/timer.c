@@ -1,64 +1,38 @@
-/*
- * timer.c — SysTick 1 ms counter implementation for CH32V003
- *
- * Register map (CH32V003 Reference Manual v1.9, Section 6.5.4):
- *   STK_CTLR  0xE000F000  — control: STE | STIE | STCLK | STRE
- *   STK_SR    0xE000F004  — status:  CNTIF (write 0 to clear)
- *   STK_CNTL  0xE000F008  — 32-bit up-counter
- *   STK_CMPLR 0xE000F010  — compare value; CNTIF set when CNT == CMP
- *
- * CTLR bits used:
- *   bit 0  STE   — start/enable counter
- *   bit 1  STIE  — enable compare-match interrupt
- *   bit 2  STCLK — 1 = HCLK source (24 MHz), 0 = HCLK/8
- *   bit 3  STRE  — auto-reload (count resets to 0 on match)
- *
- * The ISR is registered with WCH-Interrupt-fast which uses the PFIC's
- * VTF (Vector Table Free) path, cutting interrupt latency to ~2 cycles.
- */
-
+/* timer.c */
 #include "timer.h"
 #include <ch32v00x.h>
 
-/* Volatile: modified inside SysTick_Handler (interrupt context) */
-volatile uint32_t _millis = 0u;
+/*
+ * volatile: tells the compiler this variable can change at any time
+ * (from the ISR), so it must be re-read from memory on every access
+ * rather than cached in a register.
+ */
+volatile uint32_t _millis_count = 0;
 
-/* ── ISR ────────────────────────────────────────────────────────────── */
+/* SysTick ISR — runs automatically every 1ms */
 void SysTick_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void SysTick_Handler(void)
 {
-    SysTick->SR = 0u;   /* Clear CNTIF; must be written 0, not 1 */
-    _millis++;
+    SysTick->SR = 0;       /* clear the compare-match flag or it keeps firing */
+    _millis_count++;
 }
 
-/* ── Public API ─────────────────────────────────────────────────────── */
 void timer_init(void)
 {
-    SysTick->CTLR = 0u;           /* Disable while configuring           */
-    SysTick->SR   = 0u;           /* Clear any pending flag              */
-    SysTick->CNT  = 0u;           /* Reset counter                       */
-    SysTick->CMP  = 24000u - 1u;  /* 24 MHz / 24000 = 1000 Hz = 1 ms    */
+    SysTick->CTLR = 0;           /* disable while configuring              */
+    SysTick->SR   = 0;           /* clear any pending interrupt            */
+    SysTick->CNT  = 0;           /* reset counter to 0                     */
+    SysTick->CMP  = 24000 - 1;   /* 24,000 clocks at 24MHz = exactly 1ms   */
 
     NVIC_EnableIRQ(SysTicK_IRQn);
 
-    /*
-     * CTLR = 0xF:
-     *   STE=1   enable counter
-     *   STIE=1  enable interrupt on match
-     *   STCLK=1 use HCLK (24 MHz)
-     *   STRE=1  auto-reload counter to 0 on match
-     */
-    SysTick->CTLR = 0x0Fu;
+    /* CTLR = 0xF: enable counter | enable interrupt | auto-reload | HCLK */
+    SysTick->CTLR = 0xF;
 
     __enable_irq();
 }
 
 uint32_t timer_get_millis(void)
 {
-    /*
-     * On CH32V003 (single-core, no out-of-order execution) a 32-bit
-     * aligned RAM read is atomic with respect to an 8-bit ISR write.
-     * No critical section is required.
-     */
-    return _millis;
+    return _millis_count;
 }
