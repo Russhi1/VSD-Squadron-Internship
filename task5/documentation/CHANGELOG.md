@@ -45,14 +45,4 @@ Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 - GPIO ports: GPIOD (primary), GPIOA and GPIOC (supported by driver, not used by demo)
 - UART: USART1, TX only, PD5, 115200 baud 8N1
 
----
 
-## Planned / Future
-
-The following improvements are candidates for a future release and are noted here for engineering transparency:
-
-- **UART RX support:** Add `uart_rx_available()` and `uart_read_byte()` to enable command input from the host terminal (implemented in the Task-4 fork of this driver).
-- **Interrupt-driven UART TX:** Replace the blocking TXE poll with a circular TX buffer and TXEIE interrupt for non-blocking log output.
-- **Timer driver:** Extract SysTick configuration from `main.c` into a standalone `timer.h` / `timer.c` module.
-- **GPIO interrupt support:** Add EXTI configuration to allow button presses to trigger a hardware interrupt rather than relying on polling.
-- **`gpio_write` atomicity:** Replace `OUTDR` read-modify-write with `BSHR` (bit set/reset register) writes to make pin control safe from concurrent ISR access.

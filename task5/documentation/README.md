@@ -34,53 +34,19 @@ Both drivers are self-contained. Either can be pulled into a new project indepen
 ---
 
 ## Folder Structure
+![task 3](<Screenshot 2026-06-04 174155.png>)
+![task 5](<Screenshot 2026-06-04 174204.png>)
 
-```
-task3/
-└── submission/
-    ├── library/
-    │   ├── gpio.h          # GPIO API declarations and constants
-    │   ├── gpio.c          # GPIO register-level implementation
-    │   ├── uart.h          # UART API declarations
-    │   └── uart.c          # USART1 register-level implementation
-    ├── app/
-    │   └── main.c          # Demo application (uses only library APIs)
-    ├── README.md           # Task-level overview
-    └── evidence.md         # Hardware verification evidence
-
-task5/
-└── documentation/
-    ├── README.md           # ← You are here
-    ├── API_REFERENCE.md    # Full function-by-function API documentation
-    ├── ARCHITECTURE.md     # System design, block diagram, data flow
-    ├── APPLICATION_GUIDE.md # Application logic, state machine, timing
-    ├── DEMO_GUIDE.md       # Step-by-step instructions to reproduce the demo
-    └── CHANGELOG.md        # Version history
-```
-
----
-
-## Quick Start
-
-**1. Copy driver files into your PlatformIO project:**
-```
-library/gpio.h  →  include/gpio.h
-library/gpio.c  →  src/gpio.c
-library/uart.h  →  include/uart.h
-library/uart.c  →  src/uart.c
-app/main.c      →  src/main.c
-```
-
-**2. Build and flash:**
+**Build and flash:**
 ```bash
 pio run --target upload
 ```
 
-**3. Open serial monitor at 115200 baud** (8N1, no flow control) on the USB-UART adapter connected to PD5.
+**Open serial monitor at 115200 baud** (8N1, no flow control) on the USB-UART adapter connected to PD5.
 
-**4. Press the onboard button (PD4).** The LED (PD6) toggles. Press count, timestamp, and hold duration are printed over UART.
+**Press the onboard button (PD4).** The LED (PD6) toggles. Press count, timestamp, and hold duration are printed over UART.
 
-Full reproduction instructions are in [`DEMO_GUIDE.md`](DEMO_GUIDE.md).
+
 
 ---
 

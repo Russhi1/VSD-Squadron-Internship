@@ -4,33 +4,7 @@
 
 The project is structured as a two-layer firmware stack. The bottom layer contains hardware drivers. The top layer contains the application. The two layers communicate only through the driver API; the application never accesses hardware registers directly.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     APPLICATION LAYER                        │
-│                        main.c                                │
-│                                                              │
-│  SysTick ISR (1ms tick) │ main loop (poll → detect → log)   │
-└───────────────┬──────────────────────────┬───────────────────┘
-                │ gpio_*()                 │ uart_*()
-┌───────────────▼──────────┐  ┌───────────▼───────────────────┐
-│      GPIO DRIVER          │  │       UART DRIVER              │
-│   gpio.h / gpio.c         │  │    uart.h / uart.c             │
-│                           │  │                                │
-│  Clock gating (APB2)      │  │  Clock gating (APB2)           │
-│  CFGLR pin config         │  │  PD5 AF push-pull config       │
-│  OUTDR write              │  │  BRR baud divisor              │
-│  INDR read                │  │  CTLR1 UE+TE                   │
-│  Debounce filter          │  │  Blocking TXE poll             │
-└───────────────────────────┘  └────────────────────────────────┘
-                │                            │
-┌───────────────▼────────────────────────────▼───────────────┐
-│                    CH32V003 HARDWARE                         │
-│  GPIOD (PD4 BTN, PD5 TX, PD6 LED)  │  USART1               │
-│  SysTick counter + compare          │  APB2 bus             │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
+!(<Br Gpio Flow-2026-06-04-123553.png>)
 
 ## Layer Descriptions
 
@@ -69,34 +43,7 @@ SysTick is configured directly in `main.c` rather than as a library module. This
 ---
 
 ## Data Flow
-
-```
-Physical button press
-        │
-        ▼
-  GPIOD INDR register (PD4) — sampled by gpio_read() inside debounce loop
-        │
-        ▼
-  gpio_debounce_read() — 5 samples, ~40µs apart
-        │
-   ┌────┴────────┐
-  UNSTABLE      STABLE (HIGH or LOW)
-   │              │
-  discard       compare to prev_btn
-                  │
-             ┌────┴────┐
-         no change   edge detected
-                       │
-                 ┌─────┴──────┐
-             FALLING        RISING
-             (press)        (release)
-                │               │
-         toggle led_state   compute hold time
-         gpio_write()       uart_print()
-         uart_print()
-```
-
----
+!(<GPIOD INDR Register Edge-2026-06-04-123905.png>)
 
 ## Why This Architecture Was Chosen
 

@@ -1,25 +1,15 @@
-/* uart.h */
+
 #ifndef UART_H
 #define UART_H
 
+#include <ch32v00x.h>
 #include <stdint.h>
 
-/* Setup USART1 at the given baud rate. TX=PD5, RX=PD6. */
-void    uart_init(uint32_t baud);
-
-/* Transmit functions */
-void    uart_print(const char *s);
-void    uart_println(const char *s);
-void    uart_print_num(uint32_t n);
-void    uart_print_int(int32_t n);
-
-/*
- * Non-blocking receive.
- * uart_rx_available() returns 1 if a byte is waiting in the RX buffer.
- * uart_read_byte()    reads and returns that byte (clears RXNE automatically).
- * Never call uart_read_byte() without checking uart_rx_available() first.
- */
-uint8_t uart_rx_available(void);
-char    uart_read_byte(void);
+void uart_init      (uint32_t baud);   /* configure USART1 at given baud rate  */
+void uart_send_byte (uint8_t byte);    /* send one byte, blocks until TX ready  */
+void uart_print     (const char *str); /* send null-terminated string           */
+void uart_println   (const char *str); /* send string + CR+LF                   */
+void uart_print_num (uint32_t n);      /* send unsigned integer as decimal text */
+void uart_print_int (int32_t n);       /* send signed integer as decimal text   */
 
 #endif /* UART_H */
