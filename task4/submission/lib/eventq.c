@@ -1,12 +1,3 @@
-/*
- * eventq.c — Event Queue Implementation
- *
- * Push appends to the tail (O(1)).
- * Pop finds the highest-priority event anywhere in the buffer (O(n)),
- * then removes it by shifting the gap closed.
- * n is at most EVENTQ_SIZE (16), so O(n) here is negligible.
- */
-
 #include "eventq.h"
 #include <string.h>    /* strncpy, memset */
 
@@ -53,10 +44,6 @@ uint8_t eventq_pop(EventQueue *q, Event *out)
         return 0;
     }
 
-    /*
-     * Scan all valid entries to find the highest-priority event.
-     * On a tie, the entry closest to head wins (oldest first = FIFO).
-     */
     uint8_t best_slot = q->head;
     uint8_t i;
 
@@ -67,13 +54,10 @@ uint8_t eventq_pop(EventQueue *q, Event *out)
         }
     }
 
-    /* Copy the winning event to the caller */
+
     *out = q->buf[best_slot];
 
-    /*
-     * Close the gap left by removing best_slot.
-     * Shift every entry between best_slot and tail one step toward head.
-     */
+
     i = best_slot;
     while (i != q->tail) {
         uint8_t next   = (uint8_t)((i + 1u) % EVENTQ_SIZE);

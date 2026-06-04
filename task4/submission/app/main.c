@@ -1,5 +1,3 @@
-
-
 #include <ch32v00x.h>
 #include "gpio.h"
 #include "uart.h"
@@ -21,14 +19,6 @@ static uint8_t  g_led_state      = 0;
 static uint32_t g_uptime_sec     = 0;
 static uint32_t g_events_total   = 0;
 static uint32_t g_events_dropped = 0;
-
-
-/* ════════════════════════════════════════════════════════════════════════
- * SECTION 1 — PRODUCERS
- * Poll hardware every loop iteration.
- * Push an event when something noteworthy happens.
- * Never call a handler directly.
- * ════════════════════════════════════════════════════════════════════════ */
 
 static void producer_timer(void)
 {
@@ -110,14 +100,6 @@ static void producer_uart(void)
 }
 
 
-/* ════════════════════════════════════════════════════════════════════════
- * SECTION 2 — HANDLERS
- * Receive a completed event and act on it.
- * May call any driver API.
- * Must never access hardware registers directly.
- * ════════════════════════════════════════════════════════════════════════ */
-
-/* Small helper: compare two null-terminated strings without <string.h> */
 static uint8_t str_eq(const char *a, const char *b)
 {
     while (*a && *b) {
@@ -218,12 +200,6 @@ static void handler_uart_cmd(const Event *e)
     }
 }
 
-
-/* ════════════════════════════════════════════════════════════════════════
- * SECTION 3 — DISPATCHER
- * Pops one event per call, measures latency, routes to correct handler.
- * ════════════════════════════════════════════════════════════════════════ */
-
 static void dispatch_one(void)
 {
     Event e;
@@ -233,11 +209,7 @@ static void dispatch_one(void)
 
     g_events_total++;
 
-    /*
-     * Latency = time between when the event was enqueued and now.
-     * Under normal load this will be 0-1 ms.
-     * If it grows, it means the main loop is blocked somewhere.
-     */
+ 
     uint32_t latency = timer_get_millis() - e.enqueue_time;
     (void)latency;   /* used in log lines below */
 
@@ -258,18 +230,9 @@ static void dispatch_one(void)
 }
 
 
-/* ════════════════════════════════════════════════════════════════════════
- * SECTION 4 — MAIN
- * ════════════════════════════════════════════════════════════════════════ */
 
 int main(void)
 {
-    /* ── Hardware initialisation ── */
-    /*
-     * GPIO_MODE_OUTPUT / GPIO_MODE_INPUT_PU  ← new constant names in gpio.h
-     * Do NOT use GPIO_OUTPUT or GPIO_INPUT_PU — those are the old names
-     * and are no longer defined.
-     */
     gpio_init(APP_LED_PORT, APP_LED_PIN, GPIO_MODE_OUTPUT);
     gpio_init(PORT_D, BTN_PIN, GPIO_MODE_INPUT_PU);
     uart_init(115200);
@@ -291,13 +254,6 @@ int main(void)
     uart_println("================================");
     uart_println("");
 
-    /*
-     * ── Central loop ──
-     *
-     * 1. Run all producers  — each may push 0 or 1 event
-     * 2. Dispatch one event — pop highest-priority, call handler
-     * 3. Repeat immediately — no blocking waits anywhere
-     */
     while (1) {
         producer_timer();
         producer_button();
