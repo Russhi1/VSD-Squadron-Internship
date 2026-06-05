@@ -5,7 +5,35 @@
 The project is structured as a two-layer firmware stack. The bottom layer contains hardware drivers. The top layer contains the application. The two layers communicate only through the driver API; the application never accesses hardware registers directly.
 
 
-<img width="2039" height="3350" alt="Br Gpio Flow-2026-06-04-123553" src="https://github.com/user-attachments/assets/f376c4bd-8391-4dc1-b2ee-d0c81a2f06e4" />
+```mermaid
+graph TD
+    subgraph APP["Application Layer — main.c"]
+        A1["Polling Loop"]
+        A2["Edge Detection"]
+        A3["LED Toggle Logic"]
+        A4["UART Logger"]
+    end
+
+    subgraph DRV["Driver Layer — Hardware Abstraction"]
+        G["gpio.c / gpio.h"]
+        U["uart.c / uart.h"]
+    end
+
+    subgraph HW["Hardware Layer — CH32V003F4U6 @ 24 MHz"]
+        H1["GPIOD\nPD4 — Button\nPD6 — LED"]
+        H2["USART1\nPD5 — TX"]
+        H3["SysTick\n1 ms ISR"]
+    end
+
+    A1 -->|"gpio_debounce_read()"| G
+    A2 -->|"falling edge"| A3
+    A2 -->|"press / release event"| A4
+    A3 -->|"gpio_write()"| G
+    A4 -->|"uart_print()"| U
+    G -->|"CFGLR / OUTDR / INDR"| H1
+    U -->|"BRR / CTLR1 / DATAR"| H2
+    A1 -.->|"millis counter"| H3
+```
 
 
 
@@ -47,7 +75,67 @@ SysTick is configured directly in `main.c` rather than as a library module. This
 ---
 
 ## Data Flow
-<img width="2351" height="7049" alt="GPIOD INDR Register Edge-2026-06-04-123905" src="https://github.com/user-attachments/assets/498c761c-4afc-41ff-96b6-912c57d7b4ee" />
+```mermaid
+graph TD
+    B1["Button pressed physically"]
+    B2["PD4 voltage drops LOW"]
+    B3["gpio_debounce_read\nsamples pin 5 times"]
+    B4{"All 5 samples\nagree?"}
+    B5["Return UNSTABLE\nloop continues"]
+    B6["Return GPIO_LOW"]
+    B7{"prev_btn\nwas HIGH?"}
+    B8["No action taken"]
+    B9["Falling edge confirmed"]
+    B10["Toggle LED state"]
+    B11["Log press to UART"]
+    B12["gpio_write updates PD6"]
+    B13["LED turns ON or OFF"]
+
+    B1 --> B2 --> B3 --> B4
+    B4 -->|"No"| B5
+    B4 -->|"Yes"| B6
+    B6 --> B7
+    B7 -->|"No"| B8
+    B7 -->|"Yes"| B9
+    B9 --> B10
+    B9 --> B11
+    B10 --> B12
+    B12 --> B13
+```
+
+# Control Flow
+
+```mermaid
+graph TD
+    S1["main()"]
+    S2["systick_init()"]
+    S3["uart_init(115200)"]
+    S4["gpio_init PD6 OUTPUT"]
+    S5["gpio_init PD4 INPUT_PU"]
+    S6["gpio_write PD6 LOW\nLED starts OFF"]
+    S7["Print startup banner"]
+    S8["while(1) — polling loop"]
+    S9["gpio_debounce_read\nPD4, 5 samples"]
+    S10{"Result ==\nUNSTABLE?"}
+    S11["continue\nskip this iteration"]
+    S12{"btn==LOW\nprev==HIGH?"}
+    S13["Falling edge\nPress detected"]
+    S14["Toggle LED\nLog press + timestamp"]
+    S15{"btn==HIGH\nprev==LOW?"}
+    S16["Rising edge\nRelease detected"]
+    S17["Log release\n+ hold duration"]
+    S18["prev_btn = btn"]
+
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8
+    S8 --> S9 --> S10
+    S10 -->|"Yes"| S11 --> S8
+    S10 -->|"No"| S12
+    S12 -->|"Yes"| S13 --> S14 --> S15
+    S12 -->|"No"| S15
+    S15 -->|"Yes"| S16 --> S17 --> S18
+    S15 -->|"No"| S18
+    S18 --> S8
+```
 
 
 ## Why This Architecture Was Chosen

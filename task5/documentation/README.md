@@ -38,8 +38,13 @@ Both drivers are self-contained. Either can be pulled into a new project indepen
 ![task 5](<Screenshot 2026-06-04 174204.png>)
 
 **Build and flash:**
+
 ```bash
+git clone https://github.com/Russhi1/VSD-Squadron-Internship.git
+cd VSD-Squadron-Internship/task3/submission
 pio run --target upload
+pio device monitor --baud 115200
+# Press the onboard button — LED toggles, UART logs each event
 ```
 
 **Open serial monitor at 115200 baud** (8N1, no flow control) on the USB-UART adapter connected to PD5.
