@@ -144,33 +144,106 @@ Release the button after holding it for 1–2 seconds. You should see:
 - No `[PRESS]` line appears during the hold — the application correctly ignores the stable low level between the falling and rising edges.
 
 ---
-
-## Step 8 — Verify Debounce
-
-To confirm debounce is working, press and release the button very quickly 5 times in rapid succession. Each press should produce exactly one `[PRESS]` line and each release one `[RELEASE]` line. You should **not** see multiple `[PRESS]` lines for a single physical press.
-
-Expected output for 3 quick presses:
-
+### Expected UART Output
+ 
 ```
-[PRESS]   #1  |  t = 4001 ms  |  LED = ON
-[RELEASE]     |  t = 4088 ms  |  held = 87 ms
-[PRESS]   #2  |  t = 4205 ms  |  LED = OFF
-[RELEASE]     |  t = 4290 ms  |  held = 85 ms
-[PRESS]   #3  |  t = 4401 ms  |  LED = ON
-[RELEASE]     |  t = 4489 ms  |  held = 88 ms
+[PRESS]   #1  |  t = 3521 ms  |  LED = ON
+[RELEASE]     |  t = 4638 ms  |  held = 1117 ms
+ 
+[PRESS]   #2  |  t = 5902 ms  |  LED = OFF
+[RELEASE]     |  t = 7083 ms  |  held = 1181 ms
+ 
+[PRESS]   #3  |  t = 8347 ms  |  LED = ON
+[RELEASE]     |  t = 9512 ms  |  held = 1165 ms
 ```
-
-If you see duplicated `[PRESS]` lines, the debounce is not effective for your specific button. Increase the `samples` parameter in `main.c` from 5 to 10 or higher.
-
+ 
+> Timestamps and hold durations will differ — exact values depend on
+> when you press the button.
+ 
+### What to Observe on Hardware
+ 
+| Action                  | Expected hardware observation                          |
+|-------------------------|--------------------------------------------------------|
+| Press #1                |  LED (PD6) turns **ON** immediately               |
+| Release #1              | LED stays **ON** — release does not change LED state   |
+| Press #2                |  LED (PD6) turns **OFF** immediately              |
+| Release #2              | LED stays **OFF**                                      |
+| Press #3                |  LED (PD6) turns **ON** immediately               |
+| Hold button down        | LED stays in current state — no flicker during hold    |
+| Release button slowly   | No LED change on release                               |
+ 
+### What to Check in UART Output
+ 
+- Press number increments by exactly 1 per physical press
+- Each `[PRESS]` timestamp is greater than the previous `[RELEASE]` timestamp
+- Hold duration = release timestamp minus press timestamp
+- LED field alternates: `ON`, `OFF`, `ON`, `OFF`...
+- Exactly **one** `[PRESS]` line per physical button press — confirms debounce is working
 ---
-
+ 
+## Step 8 — Verify Debounce
+ 
+Press and release the button 5 times as quickly as possible (rapid taps).
+ 
+**Expected:** Exactly one `[PRESS]` and one `[RELEASE]` line per physical tap.
+ 
+**Not expected:** Multiple `[PRESS]` lines for a single tap.
+ 
+Example of correct debounce output for 3 rapid taps:
+ 
+```
+[PRESS]   #4  |  t = 12001 ms  |  LED = OFF
+[RELEASE]     |  t = 12088 ms  |  held = 87 ms
+[PRESS]   #5  |  t = 12305 ms  |  LED = ON
+[RELEASE]     |  t = 12390 ms  |  held = 85 ms
+[PRESS]   #6  |  t = 12601 ms  |  held = ON
+[RELEASE]     |  t = 12689 ms  |  held = 88 ms
+```
+ 
+If you see duplicate `[PRESS]` lines for a single tap, increase the
+`samples` argument in `gpio_debounce_read()` from 5 to 10 in `main.c`.
+ 
+---
+ 
+## Complete Expected Session
+ 
+Below is a complete reference output for a full demo session — banner,
+three presses, three releases:
+ 
+```
+=========================================
+  Advanced GPIO Library - Press Button Demo
+  VSDSquadron Mini | CH32V003F4U6
+=========================================
+[INIT] SysTick  : 1 ms tick active
+[INIT] UART     : PD5, 115200 baud, 8N1
+[INIT] LED      : PD6, output, starts OFF
+[INIT] Button   : PD4, pull-up, active LOW
+[INIT] Debounce : 5 samples x ~40 us each
+-----------------------------------------
+[INFO] Press the button to toggle the LED
+-----------------------------------------
+[PRESS]   #1  |  t = 3521 ms  |  LED = ON
+[RELEASE]     |  t = 4638 ms  |  held = 1117 ms
+[PRESS]   #2  |  t = 5902 ms  |  LED = OFF
+[RELEASE]     |  t = 7083 ms  |  held = 1181 ms
+[PRESS]   #3  |  t = 8347 ms  |  LED = ON
+[RELEASE]     |  t = 9512 ms  |  held = 1165 ms
+```
+ 
+---
+ 
 ## Troubleshooting
-
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| No output in terminal | Wrong COM port or baud rate | Check device manager / `ls /dev/tty*`, set 115200 |
-| Garbled characters | Baud rate mismatch | Set terminal to exactly 115200 |
-| LED stays OFF after press | GPIO driver not writing PD6 | Verify `LED_PIN = 6` in `gpio.h` |
-| Multiple `[PRESS]` per tap | Button bounce not filtered | Increase `samples` argument in `gpio_debounce_read()` call |
-| Flash fails | USB cable or programmer issue | Try a different USB cable; check WCH-Link LED |
-| Banner repeats multiple times | Board is resetting in a loop | Check power supply; a weak USB cable can cause brown-out resets |
+ 
+| Symptom                          | Likely Cause                        | Fix                                                    |
+|----------------------------------|-------------------------------------|--------------------------------------------------------|
+| No output in terminal            | Wrong COM port or baud rate         | Check device manager / `ls /dev/tty*`, set 115200      |
+| Garbled characters               | Baud rate mismatch                  | Set terminal to exactly 115200                         |
+| LED stays OFF after press        | Wrong pin in gpio.h                 | Verify `LED_PIN = 6` in `gpio.h`                       |
+| Multiple `[PRESS]` per tap       | Debounce not filtering              | Increase `samples` in `gpio_debounce_read()` to 10     |
+| Flash fails — device not found   | Charge-only USB cable               | Replace with a data-capable USB cable                  |
+| Flash fails — programmer error   | WCH-Link not detected               | Check USB connection, try different USB port           |
+| Banner repeats multiple times    | Board resetting in a loop           | Check USB cable quality — weak cable causes brown-out  |
+| LED turns ON at startup          | `gpio_write` call missing           | Verify `gpio_write(PORT_D, LED_PIN, GPIO_LOW)` in main |
+| No `[RELEASE]` lines             | Rising edge detection not working   | Check `prev_btn` initialisation in main.c              |
+ 
