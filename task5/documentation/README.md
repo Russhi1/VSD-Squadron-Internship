@@ -34,8 +34,26 @@ Both drivers are self-contained. Either can be pulled into a new project indepen
 ---
 
 ## Folder Structure
-![task 3](<Screenshot 2026-06-04 174155.png>)
-![task 5](<Screenshot 2026-06-04 174204.png>)
+project/
+├── task3/
+│   └── submission/
+│       ├── app/
+│       │   └── main.c
+│       └── library/
+│           ├── gpio.h
+│           ├── gpio.c
+│           ├── uart.h
+│           ├── uart.c
+│           ├── timer.h
+│           └── timer.c
+└── task5/
+    └── documentation/
+        ├── README.md
+        ├── API_REFERENCE.md
+        ├── ARCHITECTURE.md
+        ├── APPLICATION_GUIDE.md
+        ├── DEMO_GUIDE.md
+        └── CHANGELOG.md
 
 **Build and flash:**
 
