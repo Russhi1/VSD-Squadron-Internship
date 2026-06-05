@@ -49,20 +49,33 @@ The CH32V003F4U6 is a 32-bit RISC-V microcontroller running at 24 MHz from its i
 - **SysTick:** A 32-bit up-counter built into the RISC-V core. Configured with a compare value of 23999 (24000 - 1) to generate a match interrupt every 1 ms.
 
 ### Driver Layer
-
+ 
 **GPIO driver (`gpio.c`):**
-
-The CH32V003 configures each GPIO pin using 4 bits inside the `CFGLR` register. The `gpio_init()` function calculates the correct nibble for each requested mode and writes it via a clear-then-set pattern to avoid disturbing adjacent pins. The enable function for APB2 clocks is handled by a private `enable_clock()` helper inside `gpio.c`; it is not exposed in the header because the application has no reason to manage clocks directly.
-
-The debounce filter (`gpio_debounce_read`) is implemented entirely in software using repeated calls to the base `gpio_read()` with busy-wait delays between samples. No hardware timer is used for debounce. This is a deliberate design choice: it keeps the debounce logic self-contained within the GPIO driver without requiring a timer peripheral, and the blocking time (~160 µs) is acceptable in a polling loop.
-
+ 
+The CH32V003 configures each GPIO pin using 4 bits inside the `CFGLR`
+register. The `gpio_init()` function calculates the correct nibble for each
+requested mode and writes it via a clear-then-set pattern to avoid
+disturbing adjacent pins. APB2 clock enabling is handled by a private
+`enable_clock()` helper inside `gpio.c` — it is not exposed in the header
+because the application has no reason to manage clocks directly.
+ 
+The debounce filter (`gpio_debounce_read`) is implemented entirely in
+software using repeated calls to the base `gpio_read()` with busy-wait
+delays between samples. No hardware timer is used. This is a deliberate
+design choice: it keeps the debounce logic self-contained within the GPIO
+driver without requiring a timer peripheral, and the blocking time (~160 µs)
+is acceptable in a polling loop.
+ 
 **UART driver (`uart.c`):**
-
-USART1 is configured in the simplest possible way for one-way debug output: transmitter only, 8 data bits, no parity, 1 stop bit (8N1), blocking transmission. All `uart_print*` functions call down to `uart_send_byte()`, which polls the `TXE` flag in `STATR` before writing each byte to `DATAR`. There is no interrupt-driven TX buffer or DMA — the UART is only used for logging at human-readable rates, so blocking is acceptable.
-
-**SysTick (in `main.c`, not a separate driver):**
-
-SysTick is configured directly in `main.c` rather than as a library module. This is intentional: SysTick is a core-private peripheral belonging to the application, not a reusable driver in the same way as GPIO or UART. The `millis` counter it increments is a global `volatile uint32_t`.
+ 
+USART1 is configured for one-way debug output: transmitter only, 8 data
+bits, no parity, 1 stop bit (8N1), blocking transmission. All
+`uart_print*` functions call down to `uart_send_byte()`, which polls the
+`TXE` flag in `STATR` before writing each byte to `DATAR`. There is no
+interrupt-driven TX buffer or DMA — the UART is only used for logging at
+human-readable rates, so blocking is acceptable.
+ 
+---
 
 ### Application Layer
 
@@ -73,6 +86,36 @@ SysTick is configured directly in `main.c` rather than as a library module. This
 3. **Detect edges** by comparing the current debounce result against the previous confirmed state, and acting on falling edges (press) and rising edges (release).
 
 ---
+### Scheduler / Event System
+ 
+This project does not use an RTOS or a cooperative scheduler. Instead, a
+minimal interrupt-driven time base is implemented using SysTick:
+ 
+```
+SysTick ISR (fires every 1 ms)
+│
+└── millis++   ← single volatile uint32_t counter
+```
+ 
+SysTick is configured directly in `main.c` rather than as a library module.
+This is intentional: SysTick is a core-private peripheral that belongs to
+the application's timing needs, not a reusable driver in the same way as
+GPIO or UART.
+ 
+The ISR is declared with `__attribute__((interrupt("WCH-Interrupt-fast")))`,
+which is WCH's vendor-specific fast-interrupt attribute. It causes the core
+to save only the minimal register context, reducing ISR entry/exit overhead
+to a few cycles. The ISR clears `SysTick->SR` immediately to prevent
+re-entry.
+ 
+The `millis` counter drives two behaviours in the application:
+- **Press timestamps** — logged to UART at each button press.
+- **Hold duration** — computed as `release_time - press_time` using
+  unsigned subtraction, which handles the 49.7-day wraparound correctly.
+There are no other interrupt sources. GPIO and UART are both polled.
+ 
+---
+ 
 
 ## Data Flow
 ```mermaid
