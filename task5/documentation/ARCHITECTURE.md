@@ -2,8 +2,13 @@
 
 ## Overview
 
-The project is structured as a two-layer firmware stack. The bottom layer contains hardware drivers. The top layer contains the application. The two layers communicate only through the driver API; the application never accesses hardware registers directly.
+Two-layer firmware stack. Drivers sit below the application. The application
+communicates with hardware exclusively through driver API calls — no direct
+register access in `main.c`.
 
+---
+
+## High-Level Block Diagram
 
 ```mermaid
 graph TD
@@ -35,118 +40,85 @@ graph TD
     A1 -.->|"millis counter"| H3
 ```
 
-
-
+---
 
 ## Layer Descriptions
 
 ### Hardware Layer
 
-The CH32V003F4U6 is a 32-bit RISC-V microcontroller running at 24 MHz from its internal HSI RC oscillator. The peripherals used in this project are:
+CH32V003F4U6 at 24 MHz from the internal HSI RC oscillator.
 
-- **GPIOD:** Three pins are used. PD4 reads the button (input with pull-up), PD5 drives the UART TX line (alternate function), and PD6 drives the onboard LED (push-pull output).
-- **USART1:** Clocked from APB2 (same as HCLK = 24 MHz in this configuration). Baud rate is set by dividing this clock by a value written to `BRR`.
-- **SysTick:** A 32-bit up-counter built into the RISC-V core. Configured with a compare value of 23999 (24000 - 1) to generate a match interrupt every 1 ms.
+- **GPIOD** — PD4 (button, pull-up input), PD5 (UART TX, alt function),
+  PD6 (LED, push-pull output).
+- **USART1** — Clocked from APB2 at 24 MHz. Baud rate set by `BRR`.
+- **SysTick** — Core-private 32-bit counter. Compare value 23999 generates
+  a 1 ms interrupt to increment `millis`.
 
 ### Driver Layer
- 
-**GPIO driver (`gpio.c`):**
- 
-The CH32V003 configures each GPIO pin using 4 bits inside the `CFGLR`
-register. The `gpio_init()` function calculates the correct nibble for each
-requested mode and writes it via a clear-then-set pattern to avoid
-disturbing adjacent pins. APB2 clock enabling is handled by a private
-`enable_clock()` helper inside `gpio.c` — it is not exposed in the header
-because the application has no reason to manage clocks directly.
- 
-The debounce filter (`gpio_debounce_read`) is implemented entirely in
-software using repeated calls to the base `gpio_read()` with busy-wait
-delays between samples. No hardware timer is used. This is a deliberate
-design choice: it keeps the debounce logic self-contained within the GPIO
-driver without requiring a timer peripheral, and the blocking time (~160 µs)
-is acceptable in a polling loop.
- 
-**UART driver (`uart.c`):**
- 
-USART1 is configured for one-way debug output: transmitter only, 8 data
-bits, no parity, 1 stop bit (8N1), blocking transmission. All
-`uart_print*` functions call down to `uart_send_byte()`, which polls the
-`TXE` flag in `STATR` before writing each byte to `DATAR`. There is no
-interrupt-driven TX buffer or DMA — the UART is only used for logging at
-human-readable rates, so blocking is acceptable.
- 
----
+
+**GPIO (`gpio.c`):** Each pin is configured by writing a 4-bit nibble into
+`CFGLR`. `gpio_init()` uses a clear-then-set pattern to avoid disturbing
+adjacent pins. APB2 clock enabling is handled by a private `enable_clock()`
+helper — not exposed in the header because the application has no reason to
+manage clocks directly. Debounce is implemented entirely in software within
+the driver so any application using a button gets it for free.
+
+**UART (`uart.c`):** USART1 configured TX-only, 8N1, blocking. Polling the
+`TXE` flag before each byte write is sufficient at 115200 baud for debug
+logging.
+
+### Scheduler / Event System
+
+No RTOS. A single SysTick ISR fires every 1 ms and increments `millis`:
+
+```
+SysTick ISR (1 ms)
+└── millis++   ← volatile uint32_t
+```
+
+Declared with `__attribute__((interrupt("WCH-Interrupt-fast")))` to save
+only minimal register context. Clears `SysTick->SR` immediately to prevent
+re-entry. `millis` drives press timestamps and hold duration calculation.
+GPIO and UART are both polled — no other interrupt sources.
 
 ### Application Layer
 
-`main.c` contains all application logic. It has three responsibilities:
-
-1. **Initialise all drivers** in the correct order (SysTick first, then UART so the banner can be printed, then GPIO).
-2. **Run the polling loop**, which calls `gpio_debounce_read()` every iteration to sample the button.
-3. **Detect edges** by comparing the current debounce result against the previous confirmed state, and acting on falling edges (press) and rising edges (release).
+`main.c` does three things: initialises drivers in the correct order,
+runs the polling loop, and detects button edges by comparing the current
+debounce result against `prev_btn`.
 
 ---
-### Scheduler / Event System
- 
-This project does not use an RTOS or a cooperative scheduler. Instead, a
-minimal interrupt-driven time base is implemented using SysTick:
- 
-```
-SysTick ISR (fires every 1 ms)
-│
-└── millis++   ← single volatile uint32_t counter
-```
- 
-SysTick is configured directly in `main.c` rather than as a library module.
-This is intentional: SysTick is a core-private peripheral that belongs to
-the application's timing needs, not a reusable driver in the same way as
-GPIO or UART.
- 
-The ISR is declared with `__attribute__((interrupt("WCH-Interrupt-fast")))`,
-which is WCH's vendor-specific fast-interrupt attribute. It causes the core
-to save only the minimal register context, reducing ISR entry/exit overhead
-to a few cycles. The ISR clears `SysTick->SR` immediately to prevent
-re-entry.
- 
-The `millis` counter drives two behaviours in the application:
-- **Press timestamps** — logged to UART at each button press.
-- **Hold duration** — computed as `release_time - press_time` using
-  unsigned subtraction, which handles the 49.7-day wraparound correctly.
-There are no other interrupt sources. GPIO and UART are both polled.
- 
----
- 
 
 ## Data Flow
+
 ```mermaid
 graph TD
-    B1["Button pressed physically"]
-    B2["PD4 voltage drops LOW"]
-    B3["gpio_debounce_read\nsamples pin 5 times"]
-    B4{"All 5 samples\nagree?"}
+    B1["Button pressed"]
+    B2["PD4 drops LOW"]
+    B3["gpio_debounce_read — 5 samples"]
+    B4{"All samples agree?"}
     B5["Return UNSTABLE\nloop continues"]
     B6["Return GPIO_LOW"]
-    B7{"prev_btn\nwas HIGH?"}
-    B8["No action taken"]
+    B7{"prev_btn was HIGH?"}
+    B8["No action"]
     B9["Falling edge confirmed"]
-    B10["Toggle LED state"]
+    B10["Toggle LED"]
     B11["Log press to UART"]
-    B12["gpio_write updates PD6"]
-    B13["LED turns ON or OFF"]
+    B12["gpio_write PD6"]
+    B13["LED changes state"]
 
     B1 --> B2 --> B3 --> B4
     B4 -->|"No"| B5
-    B4 -->|"Yes"| B6
-    B6 --> B7
+    B4 -->|"Yes"| B6 --> B7
     B7 -->|"No"| B8
     B7 -->|"Yes"| B9
-    B9 --> B10
+    B9 --> B10 --> B12 --> B13
     B9 --> B11
-    B10 --> B12
-    B12 --> B13
 ```
 
-# Control Flow
+---
+
+## Control Flow
 
 ```mermaid
 graph TD
@@ -155,38 +127,47 @@ graph TD
     S3["uart_init(115200)"]
     S4["gpio_init PD6 OUTPUT"]
     S5["gpio_init PD4 INPUT_PU"]
-    S6["gpio_write PD6 LOW\nLED starts OFF"]
-    S7["Print startup banner"]
-    S8["while(1) — polling loop"]
-    S9["gpio_debounce_read\nPD4, 5 samples"]
-    S10{"Result ==\nUNSTABLE?"}
-    S11["continue\nskip this iteration"]
+    S6["gpio_write PD6 LOW"]
+    S7["Print banner"]
+    S8["while(1)"]
+    S9["gpio_debounce_read PD4"]
+    S10{"UNSTABLE?"}
+    S11["continue"]
     S12{"btn==LOW\nprev==HIGH?"}
-    S13["Falling edge\nPress detected"]
-    S14["Toggle LED\nLog press + timestamp"]
-    S15{"btn==HIGH\nprev==LOW?"}
-    S16["Rising edge\nRelease detected"]
-    S17["Log release\n+ hold duration"]
-    S18["prev_btn = btn"]
+    S13["Toggle LED\nLog press"]
+    S14{"btn==HIGH\nprev==LOW?"}
+    S15["Log release\n+ hold duration"]
+    S16["prev_btn = btn"]
 
     S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8
     S8 --> S9 --> S10
     S10 -->|"Yes"| S11 --> S8
     S10 -->|"No"| S12
-    S12 -->|"Yes"| S13 --> S14 --> S15
-    S12 -->|"No"| S15
-    S15 -->|"Yes"| S16 --> S17 --> S18
-    S15 -->|"No"| S18
-    S18 --> S8
+    S12 -->|"Yes"| S13 --> S14
+    S12 -->|"No"| S14
+    S14 -->|"Yes"| S15 --> S16
+    S14 -->|"No"| S16
+    S16 --> S8
 ```
 
+---
 
-## Why This Architecture Was Chosen
+## Why This Architecture
 
-**No RTOS, no interrupts for GPIO/UART:** At this project's scale (one button, one LED, one serial log), a cooperative polling loop is simpler, more predictable, and easier to debug than an interrupt-driven design. Every state transition is visible in a single execution path through `main()`.
+**Polling over interrupts:** One button, one LED, one log interface — a
+polling loop is simpler and every state transition is visible in one
+execution path through `main()`.
 
-**Strict API boundary:** By banning direct register access from `main.c`, the driver can be ported to a different CH32V003 board simply by changing pin number constants in `gpio.h`. The application code requires no modification.
+**Strict API boundary:** `main.c` never touches registers. Porting to a
+different CH32V003 board means changing pin constants in `gpio.h` only.
 
-**Blocking UART:** Blocking TX is appropriate here because the application is not time-critical. Log lines are short, UART runs at 115200 baud, and the polling loop easily tolerates the ~0.9 ms it takes to transmit a typical 12-character log line. A non-blocking UART with an interrupt-driven TX buffer would add complexity without any observable benefit.
+**Debounce in the driver:** Debounce is a property of how you read a
+mechanical input, not what you do with the result. Keeping it in the GPIO
+driver means the application doesn't need to implement it.
 
-**Software debounce in the driver, not the application:** Debounce is a property of how you read a mechanical input, not a property of what you do with the reading. Placing `gpio_debounce_read()` inside the GPIO driver means any future application that uses a button gets debounce for free.
+**Blocking UART:** Log lines are short, the loop tolerates ~3.9 ms per
+line at 115200 baud, and a non-blocking TX buffer would add complexity
+with no observable benefit.
+
+**SysTick in `main.c`:** SysTick is the application's time reference, not
+a reusable peripheral driver. Keeping it in `main.c` reflects that clearly.
